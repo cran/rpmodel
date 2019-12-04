@@ -204,7 +204,7 @@ hr {
 </head>
 
 <body>
-<p>The rpmodel package implements the P-model as described in Stocker et al. (2019) <em>Geosci. Mod. Dev.</em>. The main function available through the package is <code>rpmodel()</code>, which returns a list of quantities (see <code>?rpmodel</code>) for a given set of inputs. An additional set of important functions that are used within <code>rpmodel()</code> are also available through this package. Usage examples are given below.</p>
+<p>The rpmodel package implements the P-model as described in Stocker et al. (2019) <em>Geosci. Mod. Dev.</em> The main function available through the package is <code>rpmodel()</code>, which returns a list of quantities (see <code>?rpmodel</code>) for a given set of inputs. An additional set of important functions that are used within <code>rpmodel()</code> are also available through this package. Usage examples are given below.</p>
 
 <h2>Example P-model run</h2>
 
@@ -225,6 +225,7 @@ out_pmodel &lt;- rpmodel(
   method_optci   = &quot;prentice14&quot;,
   method_jmaxlim = &quot;none&quot;,
   do_ftemp_kphio = FALSE,
+  do_soilmstress = FALSE,
   verbose        = TRUE
   )
 </code></pre>
@@ -281,6 +282,14 @@ out_pmodel &lt;- rpmodel(
 ## 
 ## $rd
 ## [1] 0.50805
+</code></pre>
+
+<p>Here, we specified the model paramters (arguments <code>beta</code> and <code>kphio</code>). This overrides the defaults, where <code>rpmodel()</code> uses the parameters as calibrated by Stocker et al. (2019), depending on the choices for arguments <code>do_ftemp_kphio</code> and <code>do_soilmstress</code>:</p>
+
+<pre><code class="r">kphio = ifelse(do_ftemp_kphio, ifelse(do_soilmstress, 0.087182, 0.081785), 0.049977)
+beta = 146.0
+apar_soilm = 0.0
+bpar_soilm = 0.73300
 </code></pre>
 
 <p>The function returns a list of variables (see also man page by <code>?rpmodel</code>), including \(V_{\mathrm{cmax}}\), \(g_s\), and all the parameters of the photosynthesis model (\(K\), \(\Gamma^{\ast}\)), which are all internally consistent, as can be verified for&hellip;
@@ -345,7 +354,7 @@ A = V_{\text{cmax}} \frac{c_i-\Gamma^{\ast}}{c_i + K} = \phi_0 I_{\text{abs}} \f
 
 <h3>Elevation and pressure</h3>
 
-<p>Above, atmospheric pressure (<code>patm</code>) was not provided as an argument, but elevation (<code>elv</code>) was. Hence the warning was printed (only when <code>verbose = TRUE</code>), saying: <code>Atmospheric pressure (patm) not provided. Calculating it as a function of elevation (elv), assuming standard atmosphere (101325 Pa at sea level).</code>. Alternatively, we can provide atmospheric pressure (<code>patm</code>) as input, which overrides the argument <code>elv</code>.</p>
+<p>Above, atmospheric pressure (<code>patm</code>) was not provided as an argument, but elevation (<code>elv</code>) was. Hence the warning was printed (only when <code>verbose = TRUE</code>), saying: <code>Atmospheric pressure (patm) not provided. Calculating it as a function of elevation (elv),</code> <code>Assuming standard atmosphere (101325 Pa at sea level).</code>. Alternatively, we can provide atmospheric pressure (<code>patm</code>) as input, which overrides the argument <code>elv</code>.</p>
 
 <h3>P-model for time series</h3>
 
@@ -368,14 +377,17 @@ A = V_{\text{cmax}} \frac{c_i-\Gamma^{\ast}}{c_i + K} = \phi_0 I_{\text{abs}} \f
 print(out_ts_pmodel$gpp)
 </code></pre>
 
-<pre><code>## [1] 121.6522 137.6573 130.6448 126.0823 148.5923
+<pre><code>##  [1] 131.3053 138.9738 119.8071 137.4992 129.6590 131.3053 138.9738
+##  [8] 119.8071 137.4992 129.6590 131.3053 138.9738 119.8071 137.4992
+## [15] 129.6590 131.3053 138.9738 119.8071 137.4992 129.6590 131.3053
+## [22] 138.9738 119.8071 137.4992 129.6590
 </code></pre>
 
 <p>Note that <code>gpp</code> (as well as all other returned variables) are now vectors of the same length as the vectors provided as inputs.</p>
 
 <h3>P-model in the tidyverse</h3>
 
-<p>We can create a data frame (in <a href="https://www.tidyverse.org/">tidyverse</a> this is a tibble) and apply the <code>rpmode()</code> function to each row.</p>
+<p>We can create a data frame (in <a href="https://www.tidyverse.org/">tidyverse</a> this is a tibble) and apply the <code>rpmodel()</code> function to each row.</p>
 
 <pre><code class="r">library(dplyr)
 </code></pre>
@@ -416,11 +428,11 @@ print(df)
 <pre><code>## # A tibble: 5 x 6
 ##      tc   vpd   co2 fapar  ppfd out_pmodel       
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;list&gt;           
-## 1  33.2 1008.   400     1  256. &lt;named list [15]&gt;
-## 2  15.6 1014.   400     1  346. &lt;named list [15]&gt;
-## 3  21.6 1081.   400     1  341. &lt;named list [15]&gt;
-## 4  21.9  953.   400     1  275. &lt;named list [15]&gt;
-## 5  19.9 1064.   400     1  363. &lt;named list [15]&gt;
+## 1  25.1 1032.   400     1  252. &lt;named list [15]&gt;
+## 2  18.4  997.   400     1  303. &lt;named list [15]&gt;
+## 3  22.1  891.   400     1  337. &lt;named list [15]&gt;
+## 4  26.2 1087.   400     1  270. &lt;named list [15]&gt;
+## 5  23.6 1016.   400     1  331. &lt;named list [15]&gt;
 </code></pre>
 
 <p>Note that the new column <code>out_pmodel</code> now contains the list returned as output of the <code>rpmodel()</code> function applied to each row separately. Additional (constant) arguments are just passed to <code>purrr::pmap</code> as arguments.</p>
@@ -437,11 +449,11 @@ print(df)
 <pre><code>## # A tibble: 5 x 20
 ##      tc   vpd   co2 fapar  ppfd    ca gammastar   kmm ns_star   chi    mj
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1  33.2 1008.   400     1  256.  40.5      6.52 143.    0.838 0.833 0.582
-## 2  15.6 1014.   400     1  346.  40.5      2.64  31.6   1.26  0.636 0.745
-## 3  21.6 1081.   400     1  341.  40.5      3.62  52.7   1.08  0.706 0.697
-## 4  21.9  953.   400     1  275.  40.5      3.69  54.2   1.08  0.722 0.698
-## 5  19.9 1064.   400     1  363.  40.5      3.33  45.8   1.13  0.687 0.711
+## 1  25.1 1032.   400     1  252.  40.5      4.36  71.7   0.997 0.752 0.666
+## 2  18.4  997.   400     1  303.  40.5      3.06  40.0   1.17  0.674 0.725
+## 3  22.1  891.   400     1  337.  40.5      3.72  55.0   1.07  0.731 0.699
+## 4  26.2 1087.   400     1  270.  40.5      4.61  78.6   0.973 0.759 0.654
+## 5  23.6 1016.   400     1  331.  40.5      4.03  62.8   1.03  0.736 0.681
 ## # … with 9 more variables: mc &lt;dbl&gt;, ci &lt;dbl&gt;, lue &lt;dbl&gt;, gpp &lt;dbl&gt;,
 ## #   iwue &lt;dbl&gt;, gs &lt;dbl&gt;, vcmax &lt;dbl&gt;, vcmax25 &lt;dbl&gt;, rd &lt;dbl&gt;
 </code></pre>
@@ -561,19 +573,19 @@ out_pmodel_ftemp_kphio_OFF &lt;- rpmodel(
 print(paste(&quot;LUE ftemp_ON /LUE ftemp_OFF =&quot;, out_pmodel_ftemp_kphio_ON$lue / out_pmodel_ftemp_kphio_OFF$lue))
 </code></pre>
 
-<pre><code>## [1] &quot;LUE ftemp_ON /LUE ftemp_OFF = 1.08933333333333&quot;
+<pre><code>## [1] &quot;LUE ftemp_ON /LUE ftemp_OFF = 1.07351301598735&quot;
 </code></pre>
 
 <pre><code class="r">print(paste(&quot;GPP ftemp_ON /GPP ftemp_OFF =&quot;, out_pmodel_ftemp_kphio_ON$gpp / out_pmodel_ftemp_kphio_OFF$gpp))
 </code></pre>
 
-<pre><code>## [1] &quot;GPP ftemp_ON /GPP ftemp_OFF = 1.08933333333333&quot;
+<pre><code>## [1] &quot;GPP ftemp_ON /GPP ftemp_OFF = 1.07351301598735&quot;
 </code></pre>
 
 <pre><code class="r">print(paste(&quot;Vcmax ftemp_ON /Vcmax ftemp_OFF =&quot;, out_pmodel_ftemp_kphio_ON$vcmax / out_pmodel_ftemp_kphio_OFF$vcmax))
 </code></pre>
 
-<pre><code>## [1] &quot;Vcmax ftemp_ON /Vcmax ftemp_OFF = 1.08933333333333&quot;
+<pre><code>## [1] &quot;Vcmax ftemp_ON /Vcmax ftemp_OFF = 1.07351301598735&quot;
 </code></pre>
 
 <pre><code class="r">print(paste(&quot;calc_ftemp_kphio(20) =&quot;, calc_ftemp_kphio(20)))
@@ -709,6 +721,10 @@ print(paste(&quot;LUE soilmstress_ON /LUE soilmstress_OFF =&quot;, out_pmodel_so
 <!--   geom_line() -->
 
 <!-- ``` -->
+
+<h2>References</h2>
+
+<p>Stocker, B. D., Wang, H., Smith, N. G., Harrison, S. P., Keenan, T. F., Sandoval, D., Davis, T., and Prentice, I. C.: P-model v1.0: An optimality-based light use efficiency model for simulating ecosystem gross primary production, Geosci. Model Dev. Discuss., <a href="https://doi.org/10.5194/gmd-2019-200">https://doi.org/10.5194/gmd-2019-200</a>, in review, 2019.</p>
 
 </body>
 

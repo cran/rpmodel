@@ -12,9 +12,16 @@ out_pmodel <- rpmodel(
   method_optci   = "prentice14",
   method_jmaxlim = "none",
   do_ftemp_kphio = FALSE,
+  do_soilmstress = FALSE,
   verbose        = TRUE
   )
 print(out_pmodel)
+
+## ----eval=FALSE----------------------------------------------------------
+#  kphio = ifelse(do_ftemp_kphio, ifelse(do_soilmstress, 0.087182, 0.081785), 0.049977)
+#  beta = 146.0
+#  apar_soilm = 0.0
+#  bpar_soilm = 0.73300
 
 ## ------------------------------------------------------------------------
 c_molmass <- 12.0107  # molecular mass of carbon

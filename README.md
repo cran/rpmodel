@@ -1,3 +1,4 @@
+
 ## Purpose
 
 `rpmodel` provides an implementation of the P-model (Prentice et al., 2014; Wang et al., 2017; Stocker et al., 2019), which predicts acclimated photosynthetic parameters, assimilation, and dark respiration rates as a function of the environment. The main function is `rpmodel()` which returns a list of variables that are mutually consistent within the theory of the P-model (see Theory, below). Further functions used within `rpmodel()` are also provided through the package.
@@ -25,6 +26,9 @@ print( out_pmodel )
 
 ## Installation
 
+### Stable release
+`rpmodel` is available on CRAN [here](https://CRAN.R-project.org/package=rpmodel).
+
 ### Development release
 To install and load the rpmodel package (development release) run the following command in your R terminal: 
 ```r
@@ -32,9 +36,6 @@ if(!require(devtools)){install.packages(devtools)}
 devtools::install_github( "stineb/rpmodel", build_vignettes = TRUE )
 library(rpmodel)
 ```
-
-### Stable release
-`rpmodel` is not yet available on CRAN. We're working on it.
 
 ## Author and contact
 
