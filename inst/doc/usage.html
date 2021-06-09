@@ -206,6 +206,10 @@ hr {
 <body>
 <p>The rpmodel package implements the P-model as described in Stocker et al. (2019) <em>Geosci. Mod. Dev.</em> The main function available through the package is <code>rpmodel()</code>, which returns a list of quantities (see <code>?rpmodel</code>) for a given set of inputs. An additional set of important functions that are used within <code>rpmodel()</code> are also available through this package. Usage examples are given below.</p>
 
+<p><strong>Important note:</strong></p>
+
+<p>The P-model predicts how photosynthesis acclimates to a changing environment, coordinating stomatal conductance, Vcmax and Jmax. This yields a model that has the form of a light use efficiency model, where gross primary production scales linearly with absorbed light, as described in <a href="https://doi.org/10.5194/gmd-13-1545-2020">Stocker et al. 2020</a>. It is important to note that this implies that the P-model is valid only for simulating responses to the environment that evolve over the time scale at which the photosynthetic machinery (e.g., Rubisco) can be assumed to acclimate. Sensible choices are on the order of a couple of weeks to a month. In other words, the arguments (climatic forcing), provided to <code>rpmodel()</code> should represent typical daytime mean values, averaged across a couple of weeks. The output is then representative also for average values across the same time scale.</p>
+
 <h2>Example P-model run</h2>
 
 <p>Let&#39;s run the P-model, without \(J_{\text{max}}\) limitation (argument <code>method_jmaxlim = &quot;none&quot;</code>), for one point. The set of inputs, being temperature (<code>tc</code>), photosynthetic photon flux density (<code>ppfd</code>), vapour pressure deficit (<code>vpd</code>), ambient CO\(_2\) (<code>co2</code>), elevation (<code>elv</code>), and fraction of absorbed photosynthetically active radiation (<code>fapar</code>). The quantum yield efficiency parameter is provided as an argument (<code>kphio</code>) and corresponds to \(\widehat{\varphi_0}\) in Stocker et al. (2019) if the temperature-dependence of this parameter is ignored (argument <code>do_ftemp_kphio = FALSE</code>, corresponding to simulation setup &#39;ORG&#39; in Stocker et al. (2019)), or to \(\widehat{c_L}\) if the temperature-dependence of the quantum yield efficiency is included (argument <code>do_ftemp_kphio = TRUE</code>, used in simulation setups &#39;BRC&#39; and &#39;FULL&#39; in Stocker et al. (2019)). By default the optional argument <code>do_soilmstress</code> is set to <code>FALSE</code>, meaning that the empirical soil moisture stress function is not included. The unit cost ratio (\(\beta\) in Stocker et al. (2019)) is given by argument <code>beta</code>.</p>
@@ -218,27 +222,31 @@ out_pmodel &lt;- rpmodel(
   vpd            = 1000,         # Pa,
   co2            = 400,          # ppm,
   fapar          = 1,            # fraction  ,
-  ppfd           = 300,          # mol/m2/d,
+  ppfd           = 30,           # mol/m2/d,
   elv            = 0,            # m.a.s.l.,
-  kphio          = 0.05,         # quantum yield efficiency,
+  kphio          = 0.049977,     # quantum yield efficiency as calibrated for setup ORG by Stocker et al. 2020 GMD,
   beta           = 146,          # unit cost ratio a/b,
+  c4             = FALSE,
   method_optci   = &quot;prentice14&quot;,
-  method_jmaxlim = &quot;none&quot;,
-  do_ftemp_kphio = FALSE,
-  do_soilmstress = FALSE,
+  method_jmaxlim = &quot;wang17&quot;,
+  do_ftemp_kphio = FALSE,        # corresponding to setup ORG
+  do_soilmstress = FALSE,        # corresponding to setup ORG
   verbose        = TRUE
   )
 </code></pre>
 
-<pre><code>## Warning: Atmospheric pressure (patm) not provided. Calculating it as a
-## function of elevation (elv), assuming standard atmosphere (101325 Pa at sea
-## level).
+<pre><code>## Warning in rpmodel(tc = 20, vpd = 1000, co2 = 400, fapar = 1, ppfd = 30, :
+## Atmospheric pressure (patm) not provided. Calculating it as a function of
+## elevation (elv), assuming standard atmosphere (101325 Pa at sea level).
 </code></pre>
 
 <pre><code class="r">print(out_pmodel)
 </code></pre>
 
-<pre><code>## $ca
+<pre><code>## $gpp
+## [1] 7.119192
+## 
+## $ca
 ## [1] 40.53
 ## 
 ## $gammastar
@@ -253,6 +261,9 @@ out_pmodel &lt;- rpmodel(
 ## $chi
 ## [1] 0.694352
 ## 
+## $xi
+## [1] 63.3145
+## 
 ## $mj
 ## [1] 0.7123038
 ## 
@@ -262,29 +273,29 @@ out_pmodel &lt;- rpmodel(
 ## $ci
 ## [1] 28.14209
 ## 
-## $lue
-## [1] 0.4277633
-## 
-## $gpp
-## [1] 128.329
-## 
 ## $iwue
 ## [1] 7.742446
 ## 
 ## $gs
-## [1] 0.8624985
+## [1] 0.04784805
 ## 
 ## $vcmax
-## [1] 31.98167
+## [1] 1.774218
 ## 
 ## $vcmax25
-## [1] 50.20073
+## [1] 2.78494
+## 
+## $jmax
+## [1] 4.001452
+## 
+## $jmax25
+## [1] 5.464979
 ## 
 ## $rd
-## [1] 0.50805
+## [1] 0.02818463
 </code></pre>
 
-<p>Here, we specified the model paramters (arguments <code>beta</code> and <code>kphio</code>). This overrides the defaults, where <code>rpmodel()</code> uses the parameters as calibrated by Stocker et al. (2019), depending on the choices for arguments <code>do_ftemp_kphio</code> and <code>do_soilmstress</code>:</p>
+<p>Above, we specified the model paramters (arguments <code>beta</code> and <code>kphio</code>). This overrides the defaults, where <code>rpmodel()</code> uses the parameters as calibrated by Stocker et al. (2019), depending on the choices for arguments <code>do_ftemp_kphio</code> and <code>do_soilmstress</code>:</p>
 
 <pre><code class="r">kphio = ifelse(do_ftemp_kphio, ifelse(do_soilmstress, 0.087182, 0.081785), 0.049977)
 beta = 146.0
@@ -292,14 +303,13 @@ apar_soilm = 0.0
 bpar_soilm = 0.73300
 </code></pre>
 
-<p>The function returns a list of variables (see also man page by <code>?rpmodel</code>), including \(V_{\mathrm{cmax}}\), \(g_s\), and all the parameters of the photosynthesis model (\(K\), \(\Gamma^{\ast}\)), which are all internally consistent, as can be verified for&hellip;
-\[
+<p>The function returns a list of variables (see also man page by <code>?rpmodel</code>), including \(V_{\mathrm{cmax}}\), \(g_s\), and all the parameters of the photosynthesis model (\(K\), \(\Gamma^{\ast}\)), which are all internally consistent, as can be verified for&hellip; \[
 c_i = c_a - A / g_s = \chi c_a
 \]</p>
 
 <pre><code class="r">c_molmass &lt;- 12.0107  # molecular mass of carbon
 kphio &lt;- 0.05         # quantum yield efficiency, value as used in the function call to rpmodel()
-ppfd &lt;- 300           # mol/m2/d, value as used in the function call to rpmodel()
+ppfd &lt;- 30            # mol/m2/d, value as used in the function call to rpmodel()
 fapar &lt;- 1            # fraction, value as used in the function call to rpmodel()
 print( out_pmodel$ci )
 </code></pre>
@@ -319,9 +329,9 @@ print( out_pmodel$ci )
 <pre><code>## [1] 28.14209
 </code></pre>
 
-<p>Yes. </p>
+<p>Yes.</p>
 
-<p>And for&hellip;
+<p>And for&hellip; 
 \[
 A = V_{\text{cmax}} \frac{c_i-\Gamma^{\ast}}{c_i + K} = \phi_0 I_{\text{abs}} \frac{c_i-\Gamma^{\ast}}{c_i + 2 \Gamma^{\ast}} = g_s (c_a - c_i)
 \]</p>
@@ -329,25 +339,25 @@ A = V_{\text{cmax}} \frac{c_i-\Gamma^{\ast}}{c_i + K} = \phi_0 I_{\text{abs}} \f
 <pre><code class="r">print( out_pmodel$gpp / c_molmass )
 </code></pre>
 
-<pre><code>## [1] 10.68456
+<pre><code>## [1] 0.5927375
 </code></pre>
 
 <pre><code class="r">print( out_pmodel$vcmax * (out_pmodel$ci - out_pmodel$gammastar) / (out_pmodel$ci + out_pmodel$kmm ))
 </code></pre>
 
-<pre><code>## [1] 10.68456
+<pre><code>## [1] 0.5927375
 </code></pre>
 
 <pre><code class="r">print( out_pmodel$gs * (out_pmodel$ca - out_pmodel$ci) )
 </code></pre>
 
-<pre><code>## [1] 10.68456
+<pre><code>## [1] 0.5927375
 </code></pre>
 
 <pre><code class="r">print( kphio * ppfd * fapar * (out_pmodel$ci - out_pmodel$gammastar) / (out_pmodel$ci + 2 * out_pmodel$gammastar ))
 </code></pre>
 
-<pre><code>## [1] 10.68456
+<pre><code>## [1] 1.068456
 </code></pre>
 
 <p>Yes.</p>
@@ -360,27 +370,27 @@ A = V_{\text{cmax}} \frac{c_i-\Gamma^{\ast}}{c_i + K} = \phi_0 I_{\text{abs}} \f
 
 <p>The <code>rpmodel()</code> function can also be invoked for time series, where <code>tc</code>, <code>vpd</code>, <code>co2</code>, <code>fapar</code>, <code>patm</code>, and <code>ppfd</code> are vectors.</p>
 
-<pre><code class="r">out_ts_pmodel &lt;- rpmodel( 
+<pre><code class="r">set.seed(1982)
+out_ts_pmodel &lt;- rpmodel( 
   tc             = 20 + rnorm(5, mean = 0, sd = 5),
   vpd            = 1000 + rnorm(5, mean = 0, sd = 50),
   co2            = rep(400, 5),
   fapar          = rep(1, 5),
-  ppfd           = 300 + rnorm(5, mean = 0, sd = 30),
+  ppfd           = 30 + rnorm(5, mean = 0, sd = 3),
   elv            = 0,         
-  kphio          = 0.05,         
+  kphio          = 0.049977,
   beta           = 146,
+  c4             = FALSE,
   method_optci   = &quot;prentice14&quot;,
   method_jmaxlim = &quot;none&quot;,
-  do_ftemp_kphio = FALSE,
+  do_ftemp_kphio = TRUE,
+  do_soilmstress = FALSE,
   verbose        = FALSE
   )
 print(out_ts_pmodel$gpp)
 </code></pre>
 
-<pre><code>##  [1] 131.3053 138.9738 119.8071 137.4992 129.6590 131.3053 138.9738
-##  [8] 119.8071 137.4992 129.6590 131.3053 138.9738 119.8071 137.4992
-## [15] 129.6590 131.3053 138.9738 119.8071 137.4992 129.6590 131.3053
-## [22] 138.9738 119.8071 137.4992 129.6590
+<pre><code>## [1] 8.162522 7.967237 8.148933 7.468270 8.968635
 </code></pre>
 
 <p>Note that <code>gpp</code> (as well as all other returned variables) are now vectors of the same length as the vectors provided as inputs.</p>
@@ -390,49 +400,28 @@ print(out_ts_pmodel$gpp)
 <p>We can create a data frame (in <a href="https://www.tidyverse.org/">tidyverse</a> this is a tibble) and apply the <code>rpmodel()</code> function to each row.</p>
 
 <pre><code class="r">library(dplyr)
-</code></pre>
+library(purrr)
 
-<pre><code>## 
-## Attaching package: &#39;dplyr&#39;
-</code></pre>
+set.seed(1982)
 
-<pre><code>## The following objects are masked from &#39;package:stats&#39;:
-## 
-##     filter, lag
-</code></pre>
-
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     intersect, setdiff, setequal, union
-</code></pre>
-
-<pre><code class="r">library(purrr)
 df &lt;- tibble(
   tc             = 20 + rnorm(5, mean = 0, sd = 5),
   vpd            = 1000 + rnorm(5, mean = 0, sd = 50),
   co2            = rep(400, 5),
   fapar          = rep(1, 5),
-  ppfd           = 300 + rnorm(5, mean = 0, sd = 30)
+  ppfd           = 30 + rnorm(5, mean = 0, sd = 3)
   ) %&gt;%
   mutate( out_pmodel = purrr::pmap(., rpmodel, 
     elv            = 0,         
-    kphio          = 0.05,         
+    kphio          = 0.049977,
     beta           = 146,
+    c4             = FALSE,
     method_optci   = &quot;prentice14&quot;,
     method_jmaxlim = &quot;none&quot;,
     do_ftemp_kphio = FALSE
     ) )
-print(df)
-</code></pre>
 
-<pre><code>## # A tibble: 5 x 6
-##      tc   vpd   co2 fapar  ppfd out_pmodel       
-##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;list&gt;           
-## 1  25.1 1032.   400     1  252. &lt;named list [15]&gt;
-## 2  18.4  997.   400     1  303. &lt;named list [15]&gt;
-## 3  22.1  891.   400     1  337. &lt;named list [15]&gt;
-## 4  26.2 1087.   400     1  270. &lt;named list [15]&gt;
-## 5  23.6 1016.   400     1  331. &lt;named list [15]&gt;
+print(df)
 </code></pre>
 
 <p>Note that the new column <code>out_pmodel</code> now contains the list returned as output of the <code>rpmodel()</code> function applied to each row separately. Additional (constant) arguments are just passed to <code>purrr::pmap</code> as arguments.</p>
@@ -446,28 +435,16 @@ df &lt;- df %&gt;%
 print(df)
 </code></pre>
 
-<pre><code>## # A tibble: 5 x 20
-##      tc   vpd   co2 fapar  ppfd    ca gammastar   kmm ns_star   chi    mj
-##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1  25.1 1032.   400     1  252.  40.5      4.36  71.7   0.997 0.752 0.666
-## 2  18.4  997.   400     1  303.  40.5      3.06  40.0   1.17  0.674 0.725
-## 3  22.1  891.   400     1  337.  40.5      3.72  55.0   1.07  0.731 0.699
-## 4  26.2 1087.   400     1  270.  40.5      4.61  78.6   0.973 0.759 0.654
-## 5  23.6 1016.   400     1  331.  40.5      4.03  62.8   1.03  0.736 0.681
-## # … with 9 more variables: mc &lt;dbl&gt;, ci &lt;dbl&gt;, lue &lt;dbl&gt;, gpp &lt;dbl&gt;,
-## #   iwue &lt;dbl&gt;, gs &lt;dbl&gt;, vcmax &lt;dbl&gt;, vcmax25 &lt;dbl&gt;, rd &lt;dbl&gt;
-</code></pre>
-
 <h2>Auxiliary functions</h2>
 
-<p>A number of auxiliary functions, which are used within <code>rpmodel()</code>, are available (public) through the package. </p>
+<p>A number of auxiliary functions, which are used within <code>rpmodel()</code>, are available (public) through the package.</p>
 
 <h3>Instantaneous temperature scaling</h3>
 
-<p>Different instantaneous temperature scaling functions are applied for \(V_\text{cmax}\) and dark respiration (\(R_d\)). </p>
+<p>Different instantaneous temperature scaling functions are applied for \(V_\text{cmax}\) and dark respiration (\(R_d\)).</p>
 
 <ul>
-<li><code>calc_ftemp_inst_vcmax()</code> calculates the instantaneous temperature response of \(V_\text{cmax}\). Let&#39;s run the P-model for <code>tc = 10</code> (degrees C). The ratio of \(V_\text{cmax}/V_\text{cmax25}\) should equal the instantaneous temperature scaling function for \(V_\text{cmax}\) at 10 degrees C (calculated by <code>calc_ftemp_inst_vcmax(10)</code>):</li>
+<li>  <code>ftemp_inst_vcmax()</code> calculates the instantaneous temperature response of \(V_\text{cmax}\). Let&#39;s run the P-model for <code>tc = 10</code> (degrees C). The ratio of \(V_\text{cmax}/V_\text{cmax25}\) should equal the instantaneous temperature scaling function for \(V_\text{cmax}\) at 10 degrees C (calculated by <code>ftemp_inst_vcmax(10)</code>):</li>
 </ul>
 
 <pre><code class="r">out_pmodel &lt;- rpmodel( 
@@ -475,9 +452,9 @@ print(df)
   vpd            = 1000,         # Pa,
   co2            = 400,          # ppm,
   fapar          = 1,            # fraction  ,
-  ppfd           = 300,          # mol/m2/d,
+  ppfd           = 30,           # mol/m2/d,
   elv            = 0,            # m.a.s.l.,
-  kphio          = 0.05,         # quantum yield efficiency,
+  kphio          = 0.049977,     # quantum yield efficiency as calibrated for setup ORG by Stocker et al. 2020 GMD,
   beta           = 146,          # unit cost ratio a/b,
   method_optci   = &quot;prentice14&quot;,
   method_jmaxlim = &quot;none&quot;,
@@ -486,9 +463,9 @@ print(df)
   )
 </code></pre>
 
-<pre><code>## Warning: Atmospheric pressure (patm) not provided. Calculating it as a
-## function of elevation (elv), assuming standard atmosphere (101325 Pa at sea
-## level).
+<pre><code>## Warning in rpmodel(tc = 10, vpd = 1000, co2 = 400, fapar = 1, ppfd = 30, :
+## Atmospheric pressure (patm) not provided. Calculating it as a function of
+## elevation (elv), assuming standard atmosphere (101325 Pa at sea level).
 </code></pre>
 
 <pre><code class="r">print(paste(&quot;Ratio Vcmax/Vcmax25      :&quot;, out_pmodel$vcmax/out_pmodel$vcmax25))
@@ -497,27 +474,27 @@ print(df)
 <pre><code>## [1] &quot;Ratio Vcmax/Vcmax25      : 0.260975632963417&quot;
 </code></pre>
 
-<pre><code class="r">print(paste(&quot;calc_ftemp_inst_vcmax(10):&quot;, calc_ftemp_inst_vcmax(10)))
+<pre><code class="r">print(paste(&quot;ftemp_inst_vcmax(10):&quot;, ftemp_inst_vcmax(10)))
 </code></pre>
 
-<pre><code>## [1] &quot;calc_ftemp_inst_vcmax(10): 0.260975632963417&quot;
+<pre><code>## [1] &quot;ftemp_inst_vcmax(10): 0.260975632963417&quot;
 </code></pre>
 
 <ul>
-<li><p><code>calc_ftemp_arrh()</code> Calculates the Arrhenius-type temperature response and is used inside <code>calc_ftemp_inst_vcmax()</code>.</p></li>
-<li><p><code>calc_ftemp_inst_rd()</code> calculates the temperature response of dark respiration (\(R_d\)), which is slightly less steep than that for \(V_\text{cmax}\):</p></li>
+<li><p><code>ftemp_arrh()</code> Calculates the Arrhenius-type temperature response and is used inside <code>ftemp_inst_vcmax()</code>.</p></li>
+<li><p><code>ftemp_inst_rd()</code> calculates the temperature response of dark respiration (\(R_d\)), which is slightly less steep than that for \(V_\text{cmax}\):</p></li>
 </ul>
 
-<pre><code class="r">print(paste(&quot;calc_ftemp_inst_rd(10):&quot;, calc_ftemp_inst_rd(10)))
+<pre><code class="r">print(paste(&quot;ftemp_inst_rd(10):&quot;, ftemp_inst_rd(10)))
 </code></pre>
 
-<pre><code>## [1] &quot;calc_ftemp_inst_rd(10): 0.284933345928884&quot;
+<pre><code>## [1] &quot;ftemp_inst_rd(10): 0.284933345928884&quot;
 </code></pre>
 
 <h3>Parameters in the FvCB model</h3>
 
 <ul>
-<li><code>calc_gammastar()</code> calculates the CO\(_2\) compensation point (\(\Gamma^\ast\)) in the Farquhar-von Caemmerer-Berry model as a function of temperature (argument <code>tc</code>) and atmospheric pressure (argument <code>patm</code>). This is returned by the <code>rpmodel()</code> function and by the separate auxiliary function <code>calc_gammastar()</code>. <code>calc_gammastar()</code> requires atmospheric pressure (<code>patm</code>) to be given as an argument (in addition to temperature). Corresponding to the <code>rpmodel()</code> call above, let&#39;s calculate this using the auxiliary function <code>calc_patm()</code> with 0 metres above sea level, and assuming standard atmospheric pressure (101325 Pa at 0 m a.s.l.):</li>
+<li>  <code>gammastar()</code> calculates the CO\(_2\) compensation point (\(\Gamma^\ast\)) in the Farquhar-von Caemmerer-Berry model as a function of temperature (argument <code>tc</code>) and atmospheric pressure (argument <code>patm</code>). This is returned by the <code>rpmodel()</code> function and by the separate auxiliary function <code>gammastar()</code>. <code>gammastar()</code> requires atmospheric pressure (<code>patm</code>) to be given as an argument (in addition to temperature). Corresponding to the <code>rpmodel()</code> call above, let&#39;s calculate this using the auxiliary function <code>patm()</code> with 0 metres above sea level, and assuming standard atmospheric pressure (101325 Pa at 0 m a.s.l.):</li>
 </ul>
 
 <pre><code class="r">print(paste(&quot;From rpmodel call :&quot;, out_pmodel$gammastar))
@@ -526,14 +503,14 @@ print(df)
 <pre><code>## [1] &quot;From rpmodel call : 1.93016150706341&quot;
 </code></pre>
 
-<pre><code class="r">print(paste(&quot;calc_gammastar(10):&quot;, calc_gammastar(10, patm = calc_patm(elv = 0))))
+<pre><code class="r">print(paste(&quot;gammastar(10):&quot;, gammastar(10, patm = patm(elv = 0))))
 </code></pre>
 
-<pre><code>## [1] &quot;calc_gammastar(10): 1.93016150706341&quot;
+<pre><code>## [1] &quot;gammastar(10): 1.93016150706341&quot;
 </code></pre>
 
 <ul>
-<li><code>calc_kmm()</code> calculates the Michaelis Menten coefficient for Rubisco-limited photosynthesis as a function of temperature (argument <code>tc</code>) and atmospheric pressure (argument <code>patm</code>). As above,  <code>calc_kmm()</code> requires atmospheric pressure to be given as an argument (in addition to temperature). Corresponding to the <code>rpmodel()</code> call above, let&#39;s calculate this using the auxiliary function <code>calc_patm()</code> with 0 metres above sea level, and assuming standard atmospheric pressure (101325 Pa at 0 m a.s.l.):</li>
+<li>  <code>kmm()</code> calculates the Michaelis Menten coefficient for Rubisco-limited photosynthesis as a function of temperature (argument <code>tc</code>) and atmospheric pressure (argument <code>patm</code>). As above, <code>kmm()</code> requires atmospheric pressure to be given as an argument (in addition to temperature). Corresponding to the <code>rpmodel()</code> call above, let&#39;s calculate this using the auxiliary function <code>patm()</code> with 0 metres above sea level, and assuming standard atmospheric pressure (101325 Pa at 0 m a.s.l.):</li>
 </ul>
 
 <pre><code class="r">print(paste(&quot;From rpmodel call:&quot;, out_pmodel$kmm))
@@ -542,22 +519,22 @@ print(df)
 <pre><code>## [1] &quot;From rpmodel call: 19.6242174524746&quot;
 </code></pre>
 
-<pre><code class="r">print(paste(&quot;calc_kmm(10)     :&quot;, calc_kmm(10, patm = calc_patm(elv = 0))))
+<pre><code class="r">print(paste(&quot;kmm(10)     :&quot;, kmm(10, patm = patm(elv = 0))))
 </code></pre>
 
-<pre><code>## [1] &quot;calc_kmm(10)     : 19.6242174524746&quot;
+<pre><code>## [1] &quot;kmm(10)     : 19.6242174524746&quot;
 </code></pre>
 
 <h3>Temperature dependence of quantum yield efficiency</h3>
 
-<p>The temperature dependence of quantum yield efficiency is modelled following Bernacchi et al. (2003), if the argument to the <code>rpmodel()</code> call <code>do_ftemp_kphio = TRUE</code>. This affects several quantities returned by the <code>rpmodel()</code> call (GPP, LUE, Vcmax), and can be calculated direction using <code>calc_ftemp_kphio()</code>.</p>
+<p>The temperature dependence of quantum yield efficiency is modelled following Bernacchi et al. (2003), if the argument to the <code>rpmodel()</code> call <code>do_ftemp_kphio = TRUE</code>. This affects several quantities returned by the <code>rpmodel()</code> call (GPP, LUE, Vcmax), and can be calculated direction using <code>ftemp_kphio()</code>.</p>
 
 <pre><code class="r">out_pmodel_ftemp_kphio_ON &lt;- rpmodel( 
   tc             = 20,           # temperature, deg C
   vpd            = 1000,         # Pa,
   co2            = 400,          # ppm,
   fapar          = 1,            # fraction  ,
-  ppfd           = 300,          # mol/m2/d,
+  ppfd           = 30,           # mol/m2/d,
   elv            = 0,            # m.a.s.l.,
   do_ftemp_kphio = TRUE
   )
@@ -566,14 +543,14 @@ out_pmodel_ftemp_kphio_OFF &lt;- rpmodel(
   vpd            = 1000,         # Pa,
   co2            = 400,          # ppm,
   fapar          = 1,            # fraction  ,
-  ppfd           = 300,          # mol/m2/d,
+  ppfd           = 30,           # mol/m2/d,
   elv            = 0,            # m.a.s.l.,
   do_ftemp_kphio = FALSE
   )
 print(paste(&quot;LUE ftemp_ON /LUE ftemp_OFF =&quot;, out_pmodel_ftemp_kphio_ON$lue / out_pmodel_ftemp_kphio_OFF$lue))
 </code></pre>
 
-<pre><code>## [1] &quot;LUE ftemp_ON /LUE ftemp_OFF = 1.07351301598735&quot;
+<pre><code>## [1] &quot;LUE ftemp_ON /LUE ftemp_OFF = &quot;
 </code></pre>
 
 <pre><code class="r">print(paste(&quot;GPP ftemp_ON /GPP ftemp_OFF =&quot;, out_pmodel_ftemp_kphio_ON$gpp / out_pmodel_ftemp_kphio_OFF$gpp))
@@ -588,32 +565,41 @@ print(paste(&quot;LUE ftemp_ON /LUE ftemp_OFF =&quot;, out_pmodel_ftemp_kphio_ON
 <pre><code>## [1] &quot;Vcmax ftemp_ON /Vcmax ftemp_OFF = 1.07351301598735&quot;
 </code></pre>
 
-<pre><code class="r">print(paste(&quot;calc_ftemp_kphio(20) =&quot;, calc_ftemp_kphio(20)))
+<pre><code class="r">print(paste(&quot;ftemp_kphio(20) =&quot;, ftemp_kphio(20)))
 </code></pre>
 
-<pre><code>## [1] &quot;calc_ftemp_kphio(20) = 0.656&quot;
+<pre><code>## [1] &quot;ftemp_kphio(20) = 0.656&quot;
 </code></pre>
 
 <h3>Soil moisture stress</h3>
 
-<p>Similar to above (), the soil moisture dependence of LUE (and hence GPP, and Vcmax) can be calculated directly using the function <code>calc_soilmstress()</code> and affects several quantities returned by the <code>rpmodel()</code> call (GPP, LUE, Vcmax):</p>
+<p>The soil moisture stress function is available as a separate public function.</p>
+
+<pre><code class="r">vec_soilm &lt;- seq(from = 1.0, to = 0.0, by = -0.05)
+vec_soilmstress &lt;- soilmstress( vec_soilm, meanalpha = 1.0, apar_soilm = 0.0, bpar_soilm = 0.7330 )
+plot(vec_soilm, vec_soilmstress)
+</code></pre>
+
+<p><img src="data:image/png;base64,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" alt="plot of chunk unnamed-chunk-13"/></p>
+
+<p>Similar to above, the soil moisture dependence of LUE (and hence GPP, and Vcmax) can be calculated directly using the function <code>soilmstress()</code> and affects several quantities returned by the <code>rpmodel()</code> call (GPP, LUE, Vcmax):</p>
 
 <pre><code class="r">out_pmodel_soilmstress_OFF &lt;- rpmodel( 
   tc             = 20,           # temperature, deg C
   vpd            = 1000,         # Pa,
   co2            = 400,          # ppm,
   fapar          = 1,            # fraction  ,
-  ppfd           = 300,          # mol/m2/d,
+  ppfd           = 30,           # mol/m2/d,
   elv            = 0,            # m.a.s.l.,
   do_ftemp_kphio = FALSE,
-  do_soilmstress = TRUE
+  do_soilmstress = FALSE
   )
 out_pmodel_soilmstress_ON &lt;- rpmodel( 
   tc             = 20,           # temperature, deg C
   vpd            = 1000,         # Pa,
   co2            = 400,          # ppm,
   fapar          = 1,            # fraction  ,
-  ppfd           = 300,          # mol/m2/d,
+  ppfd           = 30,           # mol/m2/d,
   elv            = 0,            # m.a.s.l.,
   do_ftemp_kphio = FALSE,
   do_soilmstress = TRUE,
@@ -625,7 +611,7 @@ out_pmodel_soilmstress_ON &lt;- rpmodel(
 print(paste(&quot;LUE soilmstress_ON /LUE soilmstress_OFF =&quot;, out_pmodel_soilmstress_ON$lue / out_pmodel_soilmstress_OFF$lue))
 </code></pre>
 
-<pre><code>## [1] &quot;LUE soilmstress_ON /LUE soilmstress_OFF = 0.662222222222222&quot;
+<pre><code>## [1] &quot;LUE soilmstress_ON /LUE soilmstress_OFF = &quot;
 </code></pre>
 
 <pre><code class="r">print(paste(&quot;GPP soilmstress_ON /GPP soilmstress_OFF =&quot;, out_pmodel_soilmstress_ON$gpp / out_pmodel_soilmstress_OFF$gpp))
@@ -640,13 +626,13 @@ print(paste(&quot;LUE soilmstress_ON /LUE soilmstress_OFF =&quot;, out_pmodel_so
 <pre><code>## [1] &quot;Vcmax soilmstress_ON /Vcmax soilmstress_OFF = 0.662222222222222&quot;
 </code></pre>
 
-<pre><code class="r">print(paste(&quot;calc_soilmstress(0.2, apar_soilm = 0.1, bpar_soilm = 0.7, meanalpha = 0.2) =&quot;, calc_soilmstress(0.2, apar_soilm = 0.1, bpar_soilm = 0.7, meanalpha = 0.2)))
+<pre><code class="r">print(paste(&quot;soilmstress(0.2, apar_soilm = 0.1, bpar_soilm = 0.7, meanalpha = 0.2) =&quot;, soilmstress(0.2, apar_soilm = 0.1, bpar_soilm = 0.7, meanalpha = 0.2)))
 </code></pre>
 
-<pre><code>## [1] &quot;calc_soilmstress(0.2, apar_soilm = 0.1, bpar_soilm = 0.7, meanalpha = 0.2) = 0.662222222222222&quot;
+<pre><code>## [1] &quot;soilmstress(0.2, apar_soilm = 0.1, bpar_soilm = 0.7, meanalpha = 0.2) = 0.662222222222222&quot;
 </code></pre>
 
-<p><code>calc_ftemp_arrh()</code> Calculates the Arrhenius-type temperature response. </p>
+<p><code>ftemp_arrh()</code> Calculates the Arrhenius-type temperature response.</p>
 
 <!-- ## Response to CO2 -->
 
