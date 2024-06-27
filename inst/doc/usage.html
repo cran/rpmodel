@@ -1,248 +1,410 @@
 <!DOCTYPE html>
+
 <html>
+
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-<title>Example P-model run</title>
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<script type="text/javascript">
-window.onload = function() {
-  var imgs = document.getElementsByTagName('img'), i, img;
-  for (i = 0; i < imgs.length; i++) {
-    img = imgs[i];
-    // center an image if it is the only element of its parent
-    if (img.parentElement.childElementCount === 1)
-      img.parentElement.style.textAlign = 'center';
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Beni Stocker" />
+
+
+<title>Running the P-model in R</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
   }
-};
+});
 </script>
 
-<!-- Styles for R syntax highlighter -->
 <style type="text/css">
-   pre .operator,
-   pre .paren {
-     color: rgb(104, 118, 135)
-   }
-
-   pre .literal {
-     color: #990073
-   }
-
-   pre .number {
-     color: #099;
-   }
-
-   pre .comment {
-     color: #998;
-     font-style: italic
-   }
-
-   pre .keyword {
-     color: #900;
-     font-weight: bold
-   }
-
-   pre .identifier {
-     color: rgb(0, 0, 0);
-   }
-
-   pre .string {
-     color: #d14;
-   }
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
 </style>
 
-<!-- R syntax highlighter -->
-<script type="text/javascript">
-var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
-hljs.initHighlightingOnLoad();
-</script>
-
-<!-- MathJax scripts -->
-<script type="text/javascript" src="https://cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML">
-</script>
 
 
 <style type="text/css">
-body, td {
-   font-family: sans-serif;
-   background-color: white;
-   font-size: 13px;
+code {
+white-space: pre;
 }
-
-body {
-  max-width: 800px;
-  margin: auto;
-  padding: 1em;
-  line-height: 20px;
+.sourceCode {
+overflow: visible;
 }
-
-tt, code, pre {
-   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
 }
-
-h1 {
-   font-size:2.2em;
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
-
-h2 {
-   font-size:1.8em;
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
 }
-
-h3 {
-   font-size:1.4em;
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
 
-h4 {
-   font-size:1.0em;
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
 }
-
-h5 {
-   font-size:0.9em;
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
 }
-
-h6 {
-   font-size:0.8em;
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
 }
-
-a:visited {
-   color: rgb(50%, 0%, 50%);
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
 }
-
-pre, img {
-  max-width: 100%;
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
 }
 pre {
-  overflow-x: auto;
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
 }
-pre code {
-   display: block; padding: 0.5em;
+pre:not([class]) {
+background-color: #f7f7f7;
 }
-
 code {
-  font-size: 92%;
-  border: 1px solid #ccc;
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
 }
-
-code[class] {
-  background-color: #F8F8F8;
+p > code, li > code {
+padding: 2px 0px;
 }
-
-table, td, th {
-  border: none;
+div.figure {
+text-align: center;
 }
-
-blockquote {
-   color:#666666;
-   margin:0;
-   padding-left: 1em;
-   border-left: 0.5em #EEE solid;
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
 }
-
-hr {
-   height: 0px;
-   border-bottom: none;
-   border-top-width: thin;
-   border-top-style: dotted;
-   border-top-color: #999999;
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
 }
-
-@media print {
-   * {
-      background: transparent !important;
-      color: black !important;
-      filter:none !important;
-      -ms-filter: none !important;
-   }
-
-   body {
-      font-size:12pt;
-      max-width:100%;
-   }
-
-   a, a:visited {
-      text-decoration: underline;
-   }
-
-   hr {
-      visibility: hidden;
-      page-break-before: always;
-   }
-
-   pre, blockquote {
-      padding-right: 1em;
-      page-break-inside: avoid;
-   }
-
-   tr, img {
-      page-break-inside: avoid;
-   }
-
-   img {
-      max-width: 100% !important;
-   }
-
-   @page :left {
-      margin: 15mm 20mm 15mm 10mm;
-   }
-
-   @page :right {
-      margin: 15mm 10mm 15mm 20mm;
-   }
-
-   p, h2, h3 {
-      orphans: 3; widows: 3;
-   }
-
-   h2, h3 {
-      page-break-after: avoid;
-   }
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
 }
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
+
 
 
 
 </head>
 
 <body>
-<p>The rpmodel package implements the P-model as described in Stocker et al. (2019) <em>Geosci. Mod. Dev.</em> The main function available through the package is <code>rpmodel()</code>, which returns a list of quantities (see <code>?rpmodel</code>) for a given set of inputs. An additional set of important functions that are used within <code>rpmodel()</code> are also available through this package. Usage examples are given below.</p>
 
+
+
+
+<h1 class="title toc-ignore">Running the P-model in R</h1>
+<h4 class="author">Beni Stocker</h4>
+
+
+
+<p>The rpmodel package implements the P-model as described in Stocker et
+al. (2019) <em>Geosci. Mod. Dev.</em> The main function available
+through the package is <code>rpmodel()</code>, which returns a list of
+quantities (see <code>?rpmodel</code>) for a given set of inputs. An
+additional set of important functions that are used within
+<code>rpmodel()</code> are also available through this package. Usage
+examples are given below.</p>
 <p><strong>Important note:</strong></p>
-
-<p>The P-model predicts how photosynthesis acclimates to a changing environment, coordinating stomatal conductance, Vcmax and Jmax. This yields a model that has the form of a light use efficiency model, where gross primary production scales linearly with absorbed light, as described in <a href="https://doi.org/10.5194/gmd-13-1545-2020">Stocker et al. 2020</a>. It is important to note that this implies that the P-model is valid only for simulating responses to the environment that evolve over the time scale at which the photosynthetic machinery (e.g., Rubisco) can be assumed to acclimate. Sensible choices are on the order of a couple of weeks to a month. In other words, the arguments (climatic forcing), provided to <code>rpmodel()</code> should represent typical daytime mean values, averaged across a couple of weeks. The output is then representative also for average values across the same time scale.</p>
-
+<p>The P-model predicts how photosynthesis acclimates to a changing
+environment, coordinating stomatal conductance, Vcmax and Jmax. This
+yields a model that has the form of a light use efficiency model, where
+gross primary production scales linearly with absorbed light, as
+described in <a href="https://doi.org/10.5194/gmd-13-1545-2020">Stocker
+et al. 2020</a>. It is important to note that this implies that the
+P-model is valid only for simulating responses to the environment that
+evolve over the time scale at which the photosynthetic machinery (e.g.,
+Rubisco) can be assumed to acclimate. Sensible choices are on the order
+of a couple of weeks to a month. In other words, the arguments (climatic
+forcing), provided to <code>rpmodel()</code> should represent typical
+daytime mean values, averaged across a couple of weeks. The output is
+then representative also for average values across the same time
+scale.</p>
+<div id="example-p-model-run" class="section level2">
 <h2>Example P-model run</h2>
-
-<p>Let&#39;s run the P-model, without \(J_{\text{max}}\) limitation (argument <code>method_jmaxlim = &quot;none&quot;</code>), for one point. The set of inputs, being temperature (<code>tc</code>), photosynthetic photon flux density (<code>ppfd</code>), vapour pressure deficit (<code>vpd</code>), ambient CO\(_2\) (<code>co2</code>), elevation (<code>elv</code>), and fraction of absorbed photosynthetically active radiation (<code>fapar</code>). The quantum yield efficiency parameter is provided as an argument (<code>kphio</code>) and corresponds to \(\widehat{\varphi_0}\) in Stocker et al. (2019) if the temperature-dependence of this parameter is ignored (argument <code>do_ftemp_kphio = FALSE</code>, corresponding to simulation setup &#39;ORG&#39; in Stocker et al. (2019)), or to \(\widehat{c_L}\) if the temperature-dependence of the quantum yield efficiency is included (argument <code>do_ftemp_kphio = TRUE</code>, used in simulation setups &#39;BRC&#39; and &#39;FULL&#39; in Stocker et al. (2019)). By default the optional argument <code>do_soilmstress</code> is set to <code>FALSE</code>, meaning that the empirical soil moisture stress function is not included. The unit cost ratio (\(\beta\) in Stocker et al. (2019)) is given by argument <code>beta</code>.</p>
-
+<p>Let’s run the P-model, without <span class="math inline">\(J_{\text{max}}\)</span> limitation (argument
+<code>method_jmaxlim = &quot;none&quot;</code>), for one point. The set of inputs,
+being temperature (<code>tc</code>), photosynthetic photon flux density
+(<code>ppfd</code>), vapour pressure deficit (<code>vpd</code>), ambient
+CO<span class="math inline">\(_2\)</span> (<code>co2</code>), elevation
+(<code>elv</code>), and fraction of absorbed photosynthetically active
+radiation (<code>fapar</code>). The quantum yield efficiency parameter
+is provided as an argument (<code>kphio</code>) and corresponds to <span class="math inline">\(\widehat{\varphi_0}\)</span> in Stocker et
+al. (2019) if the temperature-dependence of this parameter is ignored
+(argument <code>do_ftemp_kphio = FALSE</code>, corresponding to
+simulation setup ‘ORG’ in Stocker et al. (2019)), or to <span class="math inline">\(\widehat{c_L}\)</span> if the
+temperature-dependence of the quantum yield efficiency is included
+(argument <code>do_ftemp_kphio = TRUE</code>, used in simulation setups
+‘BRC’ and ‘FULL’ in Stocker et al. (2019)). By default the optional
+argument <code>do_soilmstress</code> is set to <code>FALSE</code>,
+meaning that the empirical soil moisture stress function is not
+included. The unit cost ratio (<span class="math inline">\(\beta\)</span> in Stocker et al. (2019)) is given
+by argument <code>beta</code>.</p>
 <p>To run the <code>rpmodel()</code> function we can do:</p>
-
-<pre><code class="r">library(rpmodel)
-out_pmodel &lt;- rpmodel( 
-  tc             = 20,           # temperature, deg C
-  vpd            = 1000,         # Pa,
-  co2            = 400,          # ppm,
-  fapar          = 1,            # fraction  ,
-  ppfd           = 30,           # mol/m2/d,
-  elv            = 0,            # m.a.s.l.,
-  kphio          = 0.049977,     # quantum yield efficiency as calibrated for setup ORG by Stocker et al. 2020 GMD,
-  beta           = 146,          # unit cost ratio a/b,
-  c4             = FALSE,
-  method_optci   = &quot;prentice14&quot;,
-  method_jmaxlim = &quot;wang17&quot;,
-  do_ftemp_kphio = FALSE,        # corresponding to setup ORG
-  do_soilmstress = FALSE,        # corresponding to setup ORG
-  verbose        = TRUE
-  )
-</code></pre>
-
-<pre><code>## Warning in rpmodel(tc = 20, vpd = 1000, co2 = 400, fapar = 1, ppfd = 30, :
-## Atmospheric pressure (patm) not provided. Calculating it as a function of
-## elevation (elv), assuming standard atmosphere (101325 Pa at sea level).
-</code></pre>
-
-<pre><code class="r">print(out_pmodel)
-</code></pre>
-
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(rpmodel)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>out_pmodel <span class="ot">&lt;-</span> <span class="fu">rpmodel</span>( </span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="at">tc             =</span> <span class="dv">20</span>,           <span class="co"># temperature, deg C</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  <span class="at">vpd            =</span> <span class="dv">1000</span>,         <span class="co"># Pa,</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  <span class="at">co2            =</span> <span class="dv">400</span>,          <span class="co"># ppm,</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="at">fapar          =</span> <span class="dv">1</span>,            <span class="co"># fraction  ,</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="at">ppfd           =</span> <span class="dv">30</span>,           <span class="co"># mol/m2/d,</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>  <span class="at">elv            =</span> <span class="dv">0</span>,            <span class="co"># m.a.s.l.,</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>  <span class="at">kphio          =</span> <span class="fl">0.049977</span>,     <span class="co"># quantum yield efficiency as calibrated for setup ORG by Stocker et al. 2020 GMD,</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>  <span class="at">beta           =</span> <span class="dv">146</span>,          <span class="co"># unit cost ratio a/b,</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>  <span class="at">c4             =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>  <span class="at">method_jmaxlim =</span> <span class="st">&quot;wang17&quot;</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>  <span class="at">do_ftemp_kphio =</span> <span class="cn">FALSE</span>,        <span class="co"># corresponding to setup ORG</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>  <span class="at">do_soilmstress =</span> <span class="cn">FALSE</span>,        <span class="co"># corresponding to setup ORG</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>  <span class="at">verbose        =</span> <span class="cn">TRUE</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>  )</span></code></pre></div>
+<pre><code>## Warning in rpmodel(tc = 20, vpd = 1000, co2 = 400, fapar = 1, ppfd = 30, : Atmospheric pressure (patm) not provided. Calculating it as a
+##       function of elevation (elv), assuming standard atmosphere 
+##       (101325 Pa at sea level).</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">print</span>(out_pmodel)</span></code></pre></div>
 <pre><code>## $gpp
 ## [1] 7.119192
 ## 
@@ -292,426 +454,421 @@ out_pmodel &lt;- rpmodel(
 ## [1] 5.464979
 ## 
 ## $rd
-## [1] 0.02818463
-</code></pre>
-
-<p>Above, we specified the model paramters (arguments <code>beta</code> and <code>kphio</code>). This overrides the defaults, where <code>rpmodel()</code> uses the parameters as calibrated by Stocker et al. (2019), depending on the choices for arguments <code>do_ftemp_kphio</code> and <code>do_soilmstress</code>:</p>
-
-<pre><code class="r">kphio = ifelse(do_ftemp_kphio, ifelse(do_soilmstress, 0.087182, 0.081785), 0.049977)
-beta = 146.0
-apar_soilm = 0.0
-bpar_soilm = 0.73300
-</code></pre>
-
-<p>The function returns a list of variables (see also man page by <code>?rpmodel</code>), including \(V_{\mathrm{cmax}}\), \(g_s\), and all the parameters of the photosynthesis model (\(K\), \(\Gamma^{\ast}\)), which are all internally consistent, as can be verified for&hellip; \[
+## [1] 0.02818463</code></pre>
+<p>Above, we specified the model paramters (arguments <code>beta</code>
+and <code>kphio</code>). This overrides the defaults, where
+<code>rpmodel()</code> uses the parameters as calibrated by Stocker et
+al. (2019), depending on the choices for arguments
+<code>do_ftemp_kphio</code> and <code>do_soilmstress</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>kphio <span class="ot">=</span> <span class="fu">ifelse</span>(do_ftemp_kphio, <span class="fu">ifelse</span>(do_soilmstress, <span class="fl">0.087182</span>, <span class="fl">0.081785</span>), <span class="fl">0.049977</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>beta <span class="ot">=</span> <span class="fl">146.0</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>apar_soilm <span class="ot">=</span> <span class="fl">0.0</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>bpar_soilm <span class="ot">=</span> <span class="fl">0.73300</span></span></code></pre></div>
+<p>The function returns a list of variables (see also man page by
+<code>?rpmodel</code>), including <span class="math inline">\(V_{\mathrm{cmax}}\)</span>, <span class="math inline">\(g_s\)</span>, and all the parameters of the
+photosynthesis model (<span class="math inline">\(K\)</span>, <span class="math inline">\(\Gamma^{\ast}\)</span>), which are all internally
+consistent, as can be verified for…</p>
+<p><span class="math display">\[
 c_i = c_a - A / g_s = \chi c_a
-\]</p>
-
-<pre><code class="r">c_molmass &lt;- 12.0107  # molecular mass of carbon
-kphio &lt;- 0.05         # quantum yield efficiency, value as used in the function call to rpmodel()
-ppfd &lt;- 30            # mol/m2/d, value as used in the function call to rpmodel()
-fapar &lt;- 1            # fraction, value as used in the function call to rpmodel()
-print( out_pmodel$ci )
-</code></pre>
-
-<pre><code>## [1] 28.14209
-</code></pre>
-
-<pre><code class="r">print( out_pmodel$ca - (out_pmodel$gpp / c_molmass) / out_pmodel$gs )
-</code></pre>
-
-<pre><code>## [1] 28.14209
-</code></pre>
-
-<pre><code class="r">print( out_pmodel$ca * out_pmodel$chi )
-</code></pre>
-
-<pre><code>## [1] 28.14209
-</code></pre>
-
+\]</span></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>c_molmass <span class="ot">&lt;-</span> <span class="fl">12.0107</span>  <span class="co"># molecular mass of carbon</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>kphio <span class="ot">&lt;-</span> <span class="fl">0.05</span>         <span class="co"># quantum yield efficiency, value as used in the function call to rpmodel()</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>ppfd <span class="ot">&lt;-</span> <span class="dv">30</span>            <span class="co"># mol/m2/d, value as used in the function call to rpmodel()</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>fapar <span class="ot">&lt;-</span> <span class="dv">1</span>            <span class="co"># fraction, value as used in the function call to rpmodel()</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="fu">print</span>( out_pmodel<span class="sc">$</span>ci )</span></code></pre></div>
+<pre><code>## [1] 28.14209</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">print</span>( out_pmodel<span class="sc">$</span>ca <span class="sc">-</span> (out_pmodel<span class="sc">$</span>gpp <span class="sc">/</span> c_molmass) <span class="sc">/</span> out_pmodel<span class="sc">$</span>gs )</span></code></pre></div>
+<pre><code>## [1] 28.14209</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">print</span>( out_pmodel<span class="sc">$</span>ca <span class="sc">*</span> out_pmodel<span class="sc">$</span>chi )</span></code></pre></div>
+<pre><code>## [1] 28.14209</code></pre>
 <p>Yes.</p>
-
-<p>And for&hellip; 
-\[
-A = V_{\text{cmax}} \frac{c_i-\Gamma^{\ast}}{c_i + K} = \phi_0 I_{\text{abs}} \frac{c_i-\Gamma^{\ast}}{c_i + 2 \Gamma^{\ast}} = g_s (c_a - c_i)
-\]</p>
-
-<pre><code class="r">print( out_pmodel$gpp / c_molmass )
-</code></pre>
-
-<pre><code>## [1] 0.5927375
-</code></pre>
-
-<pre><code class="r">print( out_pmodel$vcmax * (out_pmodel$ci - out_pmodel$gammastar) / (out_pmodel$ci + out_pmodel$kmm ))
-</code></pre>
-
-<pre><code>## [1] 0.5927375
-</code></pre>
-
-<pre><code class="r">print( out_pmodel$gs * (out_pmodel$ca - out_pmodel$ci) )
-</code></pre>
-
-<pre><code>## [1] 0.5927375
-</code></pre>
-
-<pre><code class="r">print( kphio * ppfd * fapar * (out_pmodel$ci - out_pmodel$gammastar) / (out_pmodel$ci + 2 * out_pmodel$gammastar ))
-</code></pre>
-
-<pre><code>## [1] 1.068456
-</code></pre>
-
+<p>And for… <span class="math display">\[
+A = V_{\text{cmax}} \frac{c_i-\Gamma^{\ast}}{c_i + K} = \phi_0
+I_{\text{abs}} \frac{c_i-\Gamma^{\ast}}{c_i + 2 \Gamma^{\ast}} = g_s
+(c_a - c_i)
+\]</span></p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">print</span>( out_pmodel<span class="sc">$</span>gpp <span class="sc">/</span> c_molmass )</span></code></pre></div>
+<pre><code>## [1] 0.5927375</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">print</span>( out_pmodel<span class="sc">$</span>vcmax <span class="sc">*</span> (out_pmodel<span class="sc">$</span>ci <span class="sc">-</span> out_pmodel<span class="sc">$</span>gammastar) <span class="sc">/</span> (out_pmodel<span class="sc">$</span>ci <span class="sc">+</span> out_pmodel<span class="sc">$</span>kmm ))</span></code></pre></div>
+<pre><code>## [1] 0.5927375</code></pre>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">print</span>( out_pmodel<span class="sc">$</span>gs <span class="sc">*</span> (out_pmodel<span class="sc">$</span>ca <span class="sc">-</span> out_pmodel<span class="sc">$</span>ci) )</span></code></pre></div>
+<pre><code>## [1] 0.5927375</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">print</span>( kphio <span class="sc">*</span> ppfd <span class="sc">*</span> fapar <span class="sc">*</span> (out_pmodel<span class="sc">$</span>ci <span class="sc">-</span> out_pmodel<span class="sc">$</span>gammastar) <span class="sc">/</span> (out_pmodel<span class="sc">$</span>ci <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> out_pmodel<span class="sc">$</span>gammastar ))</span></code></pre></div>
+<pre><code>## [1] 1.068456</code></pre>
 <p>Yes.</p>
-
+<div id="elevation-and-pressure" class="section level3">
 <h3>Elevation and pressure</h3>
-
-<p>Above, atmospheric pressure (<code>patm</code>) was not provided as an argument, but elevation (<code>elv</code>) was. Hence the warning was printed (only when <code>verbose = TRUE</code>), saying: <code>Atmospheric pressure (patm) not provided. Calculating it as a function of elevation (elv),</code> <code>Assuming standard atmosphere (101325 Pa at sea level).</code>. Alternatively, we can provide atmospheric pressure (<code>patm</code>) as input, which overrides the argument <code>elv</code>.</p>
-
+<p>Above, atmospheric pressure (<code>patm</code>) was not provided as
+an argument, but elevation (<code>elv</code>) was. Hence the warning was
+printed (only when <code>verbose = TRUE</code>), saying:
+<code>Atmospheric pressure (patm) not provided. Calculating it as a function of elevation (elv),</code>
+<code>Assuming standard atmosphere (101325 Pa at sea level).</code>.
+Alternatively, we can provide atmospheric pressure (<code>patm</code>)
+as input, which overrides the argument <code>elv</code>.</p>
+</div>
+<div id="p-model-for-time-series" class="section level3">
 <h3>P-model for time series</h3>
-
-<p>The <code>rpmodel()</code> function can also be invoked for time series, where <code>tc</code>, <code>vpd</code>, <code>co2</code>, <code>fapar</code>, <code>patm</code>, and <code>ppfd</code> are vectors.</p>
-
-<pre><code class="r">set.seed(1982)
-out_ts_pmodel &lt;- rpmodel( 
-  tc             = 20 + rnorm(5, mean = 0, sd = 5),
-  vpd            = 1000 + rnorm(5, mean = 0, sd = 50),
-  co2            = rep(400, 5),
-  fapar          = rep(1, 5),
-  ppfd           = 30 + rnorm(5, mean = 0, sd = 3),
-  elv            = 0,         
-  kphio          = 0.049977,
-  beta           = 146,
-  c4             = FALSE,
-  method_optci   = &quot;prentice14&quot;,
-  method_jmaxlim = &quot;none&quot;,
-  do_ftemp_kphio = TRUE,
-  do_soilmstress = FALSE,
-  verbose        = FALSE
-  )
-print(out_ts_pmodel$gpp)
-</code></pre>
-
-<pre><code>## [1] 8.162522 7.967237 8.148933 7.468270 8.968635
-</code></pre>
-
-<p>Note that <code>gpp</code> (as well as all other returned variables) are now vectors of the same length as the vectors provided as inputs.</p>
-
+<p>The <code>rpmodel()</code> function can also be invoked for time
+series, where <code>tc</code>, <code>vpd</code>, <code>co2</code>,
+<code>fapar</code>, <code>patm</code>, and <code>ppfd</code> are
+vectors.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1982</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>out_ts_pmodel <span class="ot">&lt;-</span> <span class="fu">rpmodel</span>( </span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>  <span class="at">tc             =</span> <span class="dv">20</span> <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">5</span>),</span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>  <span class="at">vpd            =</span> <span class="dv">1000</span> <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">50</span>),</span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>  <span class="at">co2            =</span> <span class="fu">rep</span>(<span class="dv">400</span>, <span class="dv">5</span>),</span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a>  <span class="at">fapar          =</span> <span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">5</span>),</span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a>  <span class="at">ppfd           =</span> <span class="dv">30</span> <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">3</span>),</span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a>  <span class="at">elv            =</span> <span class="dv">0</span>,         </span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a>  <span class="at">kphio          =</span> <span class="fl">0.049977</span>,</span>
+<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a>  <span class="at">beta           =</span> <span class="dv">146</span>,</span>
+<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a>  <span class="at">c4             =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a>  <span class="at">method_jmaxlim =</span> <span class="st">&quot;none&quot;</span>,</span>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a>  <span class="at">do_ftemp_kphio =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb20-14"><a href="#cb20-14" tabindex="-1"></a>  <span class="at">do_soilmstress =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb20-15"><a href="#cb20-15" tabindex="-1"></a>  <span class="at">verbose        =</span> <span class="cn">FALSE</span></span>
+<span id="cb20-16"><a href="#cb20-16" tabindex="-1"></a>  )</span></code></pre></div>
+<pre><code>## Warning in sqrt((1/fact_jmaxlim)^2 - 1): NaNs produced</code></pre>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="fu">print</span>(out_ts_pmodel<span class="sc">$</span>gpp)</span></code></pre></div>
+<pre><code>## [1] 8.162522 7.967237 8.148933 7.468270 8.968635</code></pre>
+<p>Note that <code>gpp</code> (as well as all other returned variables)
+are now vectors of the same length as the vectors provided as
+inputs.</p>
+</div>
+<div id="p-model-in-the-tidyverse" class="section level3">
 <h3>P-model in the tidyverse</h3>
-
-<p>We can create a data frame (in <a href="https://www.tidyverse.org/">tidyverse</a> this is a tibble) and apply the <code>rpmodel()</code> function to each row.</p>
-
-<pre><code class="r">library(dplyr)
-library(purrr)
-
-set.seed(1982)
-
-df &lt;- tibble(
-  tc             = 20 + rnorm(5, mean = 0, sd = 5),
-  vpd            = 1000 + rnorm(5, mean = 0, sd = 50),
-  co2            = rep(400, 5),
-  fapar          = rep(1, 5),
-  ppfd           = 30 + rnorm(5, mean = 0, sd = 3)
-  ) %&gt;%
-  mutate( out_pmodel = purrr::pmap(., rpmodel, 
-    elv            = 0,         
-    kphio          = 0.049977,
-    beta           = 146,
-    c4             = FALSE,
-    method_optci   = &quot;prentice14&quot;,
-    method_jmaxlim = &quot;none&quot;,
-    do_ftemp_kphio = FALSE
-    ) )
-
-print(df)
-</code></pre>
-
-<p>Note that the new column <code>out_pmodel</code> now contains the list returned as output of the <code>rpmodel()</code> function applied to each row separately. Additional (constant) arguments are just passed to <code>purrr::pmap</code> as arguments.</p>
-
-<p>If you prefer the elements of these lists to be in separate columns of <code>df</code>, use tidyr to do:</p>
-
-<pre><code class="r">library(tidyr)
-df &lt;- df %&gt;% 
-  mutate( out_pmodel = purrr::map(out_pmodel, ~as_tibble(.))) %&gt;% 
-  unnest(out_pmodel)
-print(df)
-</code></pre>
-
+<p>We can create a data frame (in <a href="https://www.tidyverse.org/">tidyverse</a> this is a tibble) and
+apply the <code>rpmodel()</code> function to each row.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1982</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb24-7"><a href="#cb24-7" tabindex="-1"></a>  <span class="at">tc             =</span> <span class="dv">20</span> <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">5</span>),</span>
+<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a>  <span class="at">vpd            =</span> <span class="dv">1000</span> <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">50</span>),</span>
+<span id="cb24-9"><a href="#cb24-9" tabindex="-1"></a>  <span class="at">co2            =</span> <span class="fu">rep</span>(<span class="dv">400</span>, <span class="dv">5</span>),</span>
+<span id="cb24-10"><a href="#cb24-10" tabindex="-1"></a>  <span class="at">fapar          =</span> <span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">5</span>),</span>
+<span id="cb24-11"><a href="#cb24-11" tabindex="-1"></a>  <span class="at">ppfd           =</span> <span class="dv">30</span> <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">3</span>)</span>
+<span id="cb24-12"><a href="#cb24-12" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb24-13"><a href="#cb24-13" tabindex="-1"></a>  <span class="fu">mutate</span>( <span class="at">out_pmodel =</span> purrr<span class="sc">::</span><span class="fu">pmap</span>(., rpmodel, </span>
+<span id="cb24-14"><a href="#cb24-14" tabindex="-1"></a>    <span class="at">elv            =</span> <span class="dv">0</span>,         </span>
+<span id="cb24-15"><a href="#cb24-15" tabindex="-1"></a>    <span class="at">kphio          =</span> <span class="fl">0.049977</span>,</span>
+<span id="cb24-16"><a href="#cb24-16" tabindex="-1"></a>    <span class="at">beta           =</span> <span class="dv">146</span>,</span>
+<span id="cb24-17"><a href="#cb24-17" tabindex="-1"></a>    <span class="at">c4             =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb24-18"><a href="#cb24-18" tabindex="-1"></a>    <span class="at">method_jmaxlim =</span> <span class="st">&quot;none&quot;</span>,</span>
+<span id="cb24-19"><a href="#cb24-19" tabindex="-1"></a>    <span class="at">do_ftemp_kphio =</span> <span class="cn">FALSE</span></span>
+<span id="cb24-20"><a href="#cb24-20" tabindex="-1"></a>    ) )</span>
+<span id="cb24-21"><a href="#cb24-21" tabindex="-1"></a></span>
+<span id="cb24-22"><a href="#cb24-22" tabindex="-1"></a><span class="fu">print</span>(df)</span></code></pre></div>
+<p>Note that the new column <code>out_pmodel</code> now contains the
+list returned as output of the <code>rpmodel()</code> function applied
+to each row separately. Additional (constant) arguments are just passed
+to <code>purrr::pmap</code> as arguments.</p>
+<p>If you prefer the elements of these lists to be in separate columns
+of <code>df</code>, use tidyr to do:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> </span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>  <span class="fu">mutate</span>( <span class="at">out_pmodel =</span> purrr<span class="sc">::</span><span class="fu">map</span>(out_pmodel, <span class="sc">~</span><span class="fu">as_tibble</span>(.))) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>  <span class="fu">unnest</span>(out_pmodel)</span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a><span class="fu">print</span>(df)</span></code></pre></div>
+</div>
+<div id="c4-photosynthesis" class="section level3">
+<h3>C4 photosynthesis</h3>
+<p>Photosynthesis by C4 plants is simulated by the P-model based on the
+assumption that the “CO2 limitation term” in the FvCB model (Eq. 11 in
+Stocker et al., 2020) is 1 (no limitation), and based on a distinct
+parametrisation of the quantum yield efficiency and its temperature
+dependence <span class="math inline">\(\varphi_0\)</span>, following Cai
+&amp; Prentice, 2020. Under identical conditions, GPP of C3 and C4
+photosynthesis are different:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>out_c3 <span class="ot">&lt;-</span> <span class="fu">rpmodel</span>( </span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a>  <span class="at">tc             =</span> <span class="dv">20</span>,           <span class="co"># temperature, deg C</span></span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a>  <span class="at">vpd            =</span> <span class="dv">1000</span>,         <span class="co"># Pa,</span></span>
+<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a>  <span class="at">co2            =</span> <span class="dv">400</span>,          <span class="co"># ppm,</span></span>
+<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a>  <span class="at">fapar          =</span> <span class="dv">1</span>,            <span class="co"># fraction  ,</span></span>
+<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a>  <span class="at">ppfd           =</span> <span class="dv">30</span>,           <span class="co"># mol/m2/d,</span></span>
+<span id="cb26-7"><a href="#cb26-7" tabindex="-1"></a>  <span class="at">elv            =</span> <span class="dv">0</span>,            <span class="co"># m.a.s.l.,</span></span>
+<span id="cb26-8"><a href="#cb26-8" tabindex="-1"></a>  <span class="at">c4             =</span> <span class="cn">FALSE</span></span>
+<span id="cb26-9"><a href="#cb26-9" tabindex="-1"></a>  )</span>
+<span id="cb26-10"><a href="#cb26-10" tabindex="-1"></a>out_c4 <span class="ot">&lt;-</span> <span class="fu">rpmodel</span>( </span>
+<span id="cb26-11"><a href="#cb26-11" tabindex="-1"></a>  <span class="at">tc             =</span> <span class="dv">20</span>,           <span class="co"># temperature, deg C</span></span>
+<span id="cb26-12"><a href="#cb26-12" tabindex="-1"></a>  <span class="at">vpd            =</span> <span class="dv">1000</span>,         <span class="co"># Pa,</span></span>
+<span id="cb26-13"><a href="#cb26-13" tabindex="-1"></a>  <span class="at">co2            =</span> <span class="dv">400</span>,          <span class="co"># ppm,</span></span>
+<span id="cb26-14"><a href="#cb26-14" tabindex="-1"></a>  <span class="at">fapar          =</span> <span class="dv">1</span>,            <span class="co"># fraction  ,</span></span>
+<span id="cb26-15"><a href="#cb26-15" tabindex="-1"></a>  <span class="at">ppfd           =</span> <span class="dv">30</span>,           <span class="co"># mol/m2/d,</span></span>
+<span id="cb26-16"><a href="#cb26-16" tabindex="-1"></a>  <span class="at">elv            =</span> <span class="dv">0</span>,            <span class="co"># m.a.s.l.,</span></span>
+<span id="cb26-17"><a href="#cb26-17" tabindex="-1"></a>  <span class="at">c4             =</span> <span class="cn">TRUE</span></span>
+<span id="cb26-18"><a href="#cb26-18" tabindex="-1"></a>  )</span></code></pre></div>
+<pre><code>## Warning in rpmodel(tc = 20, vpd = 1000, co2 = 400, fapar = 1, ppfd = 30, : rpmodel(): light and Rubisco-limited assimilation rates are not identical.
+## Mean relative difference: 1.582923</code></pre>
+<pre><code>## Warning in rpmodel(tc = 20, vpd = 1000, co2 = 400, fapar = 1, ppfd = 30, : rpmodel(): Assimilation and GPP are not identical.
+## Mean relative difference: 1.582923</code></pre>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="fu">print</span>(out_c3<span class="sc">$</span>gpp)</span></code></pre></div>
+<pre><code>## [1] 7.642545</code></pre>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a><span class="fu">print</span>(out_c4<span class="sc">$</span>gpp)</span></code></pre></div>
+<pre><code>## [1] 126.2565</code></pre>
+<p>To accurately simulate C3 photosynthesis, a constant scalar was
+calibrated by Stocker et al., 2020 to GPP from FLUXNET2015 data and
+scaled in their ‘BRC’ and ‘FULL’ setup with a temperature dependence
+factor (their Eq. 20). The implementation of C3 photosynthesis in
+rpmodel uses <code>kphio</code> as a constant scalar, provided to
+<code>rpmodel()</code> as an argument, and representing <span class="math inline">\((a_L b_L)/4\)</span> in their Eq. 20. The
+temprature dependence is calculated based on Bernacchi et al., 2003
+using the function <code>ftemp_kphio()</code>.</p>
+<p>The implementation of C4 photosynthesis uses a different temperature
+dependence of <span class="math inline">\(\varphi_0\)</span> following
+Eq. 5 in Cai &amp; Prentice (2020), implemented by
+<code>ftemp_kphio(c4 = TRUE)</code>. The calibratable parameter
+<code>kphio</code> doesn’t appear explicitly in Eq. 5 by Cai &amp;
+Prentice (2020), but is implemented the same way in rpmodel as for C3
+photosynthesis. It should therefore be regarded as a “correction”
+factor, where <code>kphio = 1.0</code> means “no correction” and
+reflects the parametrisation used by Cai &amp; Prentice (2020).</p>
+<p>The following shows <span class="math inline">\(\varphi(T)\)</span>,
+corresponding to <code>kphio * ftemp_kphio()</code>, using parameters as
+in Stocker et al., 2020 for C3 vegetation (their ‘BRC’ setup, black line
+in the plot below), and as in Cai &amp; Prentice (2020) for C4
+vegetation (blue solid line).</p>
+<p>Addendum: As of <a href="https://github.com/geco-bern/rpmodel/issues/19">issue #19</a>
+(raised by David Orme), the values provided in Cai &amp; Prentice (2020)
+are erroneous. And instead, the temperature response function for C4
+should be <code>ftemp = -0.064 + 0.03 * tc - 0.000464 * tc^2</code>.
+This is now also implemented in rpmodel.</p>
+</div>
+</div>
+<div id="auxiliary-functions" class="section level2">
 <h2>Auxiliary functions</h2>
-
-<p>A number of auxiliary functions, which are used within <code>rpmodel()</code>, are available (public) through the package.</p>
-
+<p>A number of auxiliary functions, which are used within
+<code>rpmodel()</code>, are available (public) through the package.</p>
+<div id="instantaneous-temperature-scaling" class="section level3">
 <h3>Instantaneous temperature scaling</h3>
-
-<p>Different instantaneous temperature scaling functions are applied for \(V_\text{cmax}\) and dark respiration (\(R_d\)).</p>
-
+<p>Different instantaneous temperature scaling functions are applied for
+<span class="math inline">\(V_\text{cmax}\)</span> and dark respiration
+(<span class="math inline">\(R_d\)</span>).</p>
 <ul>
-<li>  <code>ftemp_inst_vcmax()</code> calculates the instantaneous temperature response of \(V_\text{cmax}\). Let&#39;s run the P-model for <code>tc = 10</code> (degrees C). The ratio of \(V_\text{cmax}/V_\text{cmax25}\) should equal the instantaneous temperature scaling function for \(V_\text{cmax}\) at 10 degrees C (calculated by <code>ftemp_inst_vcmax(10)</code>):</li>
+<li><code>ftemp_inst_vcmax()</code> calculates the instantaneous
+temperature response of <span class="math inline">\(V_\text{cmax}\)</span>. Let’s run the P-model for
+<code>tc = 10</code> (degrees C). The ratio of <span class="math inline">\(V_\text{cmax}/V_\text{cmax25}\)</span> should
+equal the instantaneous temperature scaling function for <span class="math inline">\(V_\text{cmax}\)</span> at 10 degrees C (calculated
+by <code>ftemp_inst_vcmax(10)</code>):</li>
 </ul>
-
-<pre><code class="r">out_pmodel &lt;- rpmodel( 
-  tc             = 10,           # temperature, deg C
-  vpd            = 1000,         # Pa,
-  co2            = 400,          # ppm,
-  fapar          = 1,            # fraction  ,
-  ppfd           = 30,           # mol/m2/d,
-  elv            = 0,            # m.a.s.l.,
-  kphio          = 0.049977,     # quantum yield efficiency as calibrated for setup ORG by Stocker et al. 2020 GMD,
-  beta           = 146,          # unit cost ratio a/b,
-  method_optci   = &quot;prentice14&quot;,
-  method_jmaxlim = &quot;none&quot;,
-  do_ftemp_kphio = FALSE,
-  verbose        = TRUE
-  )
-</code></pre>
-
-<pre><code>## Warning in rpmodel(tc = 10, vpd = 1000, co2 = 400, fapar = 1, ppfd = 30, :
-## Atmospheric pressure (patm) not provided. Calculating it as a function of
-## elevation (elv), assuming standard atmosphere (101325 Pa at sea level).
-</code></pre>
-
-<pre><code class="r">print(paste(&quot;Ratio Vcmax/Vcmax25      :&quot;, out_pmodel$vcmax/out_pmodel$vcmax25))
-</code></pre>
-
-<pre><code>## [1] &quot;Ratio Vcmax/Vcmax25      : 0.260975632963417&quot;
-</code></pre>
-
-<pre><code class="r">print(paste(&quot;ftemp_inst_vcmax(10):&quot;, ftemp_inst_vcmax(10)))
-</code></pre>
-
-<pre><code>## [1] &quot;ftemp_inst_vcmax(10): 0.260975632963417&quot;
-</code></pre>
-
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a>out_pmodel <span class="ot">&lt;-</span> <span class="fu">rpmodel</span>( </span>
+<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a>  <span class="at">tc             =</span> <span class="dv">10</span>,           <span class="co"># temperature, deg C</span></span>
+<span id="cb33-3"><a href="#cb33-3" tabindex="-1"></a>  <span class="at">vpd            =</span> <span class="dv">1000</span>,         <span class="co"># Pa,</span></span>
+<span id="cb33-4"><a href="#cb33-4" tabindex="-1"></a>  <span class="at">co2            =</span> <span class="dv">400</span>,          <span class="co"># ppm,</span></span>
+<span id="cb33-5"><a href="#cb33-5" tabindex="-1"></a>  <span class="at">fapar          =</span> <span class="dv">1</span>,            <span class="co"># fraction  ,</span></span>
+<span id="cb33-6"><a href="#cb33-6" tabindex="-1"></a>  <span class="at">ppfd           =</span> <span class="dv">30</span>,           <span class="co"># mol/m2/d,</span></span>
+<span id="cb33-7"><a href="#cb33-7" tabindex="-1"></a>  <span class="at">elv            =</span> <span class="dv">0</span>,            <span class="co"># m.a.s.l.,</span></span>
+<span id="cb33-8"><a href="#cb33-8" tabindex="-1"></a>  <span class="at">kphio          =</span> <span class="fl">0.049977</span>,     <span class="co"># quantum yield efficiency as calibrated for setup ORG by Stocker et al. 2020 GMD,</span></span>
+<span id="cb33-9"><a href="#cb33-9" tabindex="-1"></a>  <span class="at">beta           =</span> <span class="dv">146</span>,          <span class="co"># unit cost ratio a/b,</span></span>
+<span id="cb33-10"><a href="#cb33-10" tabindex="-1"></a>  <span class="at">method_jmaxlim =</span> <span class="st">&quot;none&quot;</span>,</span>
+<span id="cb33-11"><a href="#cb33-11" tabindex="-1"></a>  <span class="at">do_ftemp_kphio =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb33-12"><a href="#cb33-12" tabindex="-1"></a>  <span class="at">verbose        =</span> <span class="cn">TRUE</span></span>
+<span id="cb33-13"><a href="#cb33-13" tabindex="-1"></a>  )</span></code></pre></div>
+<pre><code>## Warning in rpmodel(tc = 10, vpd = 1000, co2 = 400, fapar = 1, ppfd = 30, : Atmospheric pressure (patm) not provided. Calculating it as a
+##       function of elevation (elv), assuming standard atmosphere 
+##       (101325 Pa at sea level).</code></pre>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Ratio Vcmax/Vcmax25      :&quot;</span>, out_pmodel<span class="sc">$</span>vcmax<span class="sc">/</span>out_pmodel<span class="sc">$</span>vcmax25))</span></code></pre></div>
+<pre><code>## [1] &quot;Ratio Vcmax/Vcmax25      : 0.260975632963417&quot;</code></pre>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;ftemp_inst_vcmax(10):&quot;</span>, <span class="fu">ftemp_inst_vcmax</span>(<span class="dv">10</span>)))</span></code></pre></div>
+<pre><code>## [1] &quot;ftemp_inst_vcmax(10): 0.260975632963417&quot;</code></pre>
 <ul>
-<li><p><code>ftemp_arrh()</code> Calculates the Arrhenius-type temperature response and is used inside <code>ftemp_inst_vcmax()</code>.</p></li>
-<li><p><code>ftemp_inst_rd()</code> calculates the temperature response of dark respiration (\(R_d\)), which is slightly less steep than that for \(V_\text{cmax}\):</p></li>
+<li><p><code>ftemp_arrh()</code> Calculates the Arrhenius-type
+temperature response and is used inside
+<code>ftemp_inst_vcmax()</code>.</p></li>
+<li><p><code>ftemp_inst_rd()</code> calculates the temperature response
+of dark respiration (<span class="math inline">\(R_d\)</span>), which is
+slightly less steep than that for <span class="math inline">\(V_\text{cmax}\)</span>:</p></li>
 </ul>
-
-<pre><code class="r">print(paste(&quot;ftemp_inst_rd(10):&quot;, ftemp_inst_rd(10)))
-</code></pre>
-
-<pre><code>## [1] &quot;ftemp_inst_rd(10): 0.284933345928884&quot;
-</code></pre>
-
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;ftemp_inst_rd(10):&quot;</span>, <span class="fu">ftemp_inst_rd</span>(<span class="dv">10</span>)))</span></code></pre></div>
+<pre><code>## [1] &quot;ftemp_inst_rd(10): 0.284933345928884&quot;</code></pre>
+</div>
+<div id="parameters-in-the-fvcb-model" class="section level3">
 <h3>Parameters in the FvCB model</h3>
-
 <ul>
-<li>  <code>gammastar()</code> calculates the CO\(_2\) compensation point (\(\Gamma^\ast\)) in the Farquhar-von Caemmerer-Berry model as a function of temperature (argument <code>tc</code>) and atmospheric pressure (argument <code>patm</code>). This is returned by the <code>rpmodel()</code> function and by the separate auxiliary function <code>gammastar()</code>. <code>gammastar()</code> requires atmospheric pressure (<code>patm</code>) to be given as an argument (in addition to temperature). Corresponding to the <code>rpmodel()</code> call above, let&#39;s calculate this using the auxiliary function <code>patm()</code> with 0 metres above sea level, and assuming standard atmospheric pressure (101325 Pa at 0 m a.s.l.):</li>
+<li><code>calc_gammastar()</code> calculates the CO<span class="math inline">\(_2\)</span> compensation point (<span class="math inline">\(\Gamma^\ast\)</span>) in the Farquhar-von
+Caemmerer-Berry model as a function of temperature (argument
+<code>tc</code>) and atmospheric pressure (argument <code>patm</code>).
+This is returned by the <code>rpmodel()</code> function and by the
+separate auxiliary function <code>calc_gammastar()</code>.
+<code>calc_gammastar()</code> requires atmospheric pressure
+(<code>patm</code>) to be given as an argument (in addition to
+temperature). Corresponding to the <code>rpmodel()</code> call above,
+let’s calculate this using the auxiliary function
+<code>calc_patm()</code> with 0 metres above sea level, and assuming
+standard atmospheric pressure (101325 Pa at 0 m a.s.l.):</li>
 </ul>
-
-<pre><code class="r">print(paste(&quot;From rpmodel call :&quot;, out_pmodel$gammastar))
-</code></pre>
-
-<pre><code>## [1] &quot;From rpmodel call : 1.93016150706341&quot;
-</code></pre>
-
-<pre><code class="r">print(paste(&quot;gammastar(10):&quot;, gammastar(10, patm = patm(elv = 0))))
-</code></pre>
-
-<pre><code>## [1] &quot;gammastar(10): 1.93016150706341&quot;
-</code></pre>
-
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;From rpmodel call :&quot;</span>, out_pmodel<span class="sc">$</span>gammastar))</span></code></pre></div>
+<pre><code>## [1] &quot;From rpmodel call : 1.93016150706341&quot;</code></pre>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;gammastar(10):&quot;</span>, <span class="fu">calc_gammastar</span>(<span class="dv">10</span>, <span class="at">patm =</span> <span class="fu">calc_patm</span>(<span class="at">elv =</span> <span class="dv">0</span>))))</span></code></pre></div>
+<pre><code>## [1] &quot;gammastar(10): 1.93016150706341&quot;</code></pre>
 <ul>
-<li>  <code>kmm()</code> calculates the Michaelis Menten coefficient for Rubisco-limited photosynthesis as a function of temperature (argument <code>tc</code>) and atmospheric pressure (argument <code>patm</code>). As above, <code>kmm()</code> requires atmospheric pressure to be given as an argument (in addition to temperature). Corresponding to the <code>rpmodel()</code> call above, let&#39;s calculate this using the auxiliary function <code>patm()</code> with 0 metres above sea level, and assuming standard atmospheric pressure (101325 Pa at 0 m a.s.l.):</li>
+<li><code>calc_kmm()</code> calculates the Michaelis Menten coefficient
+for Rubisco-limited photosynthesis as a function of temperature
+(argument <code>tc</code>) and atmospheric pressure (argument
+<code>patm</code>). As above, <code>calc_kmm()</code> requires
+atmospheric pressure to be given as an argument (in addition to
+temperature). Corresponding to the <code>rpmodel()</code> call above,
+let’s calculate this using the auxiliary function
+<code>calc_patm()</code> with 0 metres above sea level, and assuming
+standard atmospheric pressure (101325 Pa at 0 m a.s.l.):</li>
 </ul>
-
-<pre><code class="r">print(paste(&quot;From rpmodel call:&quot;, out_pmodel$kmm))
-</code></pre>
-
-<pre><code>## [1] &quot;From rpmodel call: 19.6242174524746&quot;
-</code></pre>
-
-<pre><code class="r">print(paste(&quot;kmm(10)     :&quot;, kmm(10, patm = patm(elv = 0))))
-</code></pre>
-
-<pre><code>## [1] &quot;kmm(10)     : 19.6242174524746&quot;
-</code></pre>
-
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;From rpmodel call:&quot;</span>, out_pmodel<span class="sc">$</span>kmm))</span></code></pre></div>
+<pre><code>## [1] &quot;From rpmodel call: 19.6242174524746&quot;</code></pre>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;kmm(10)     :&quot;</span>, <span class="fu">calc_kmm</span>(<span class="dv">10</span>, <span class="at">patm =</span> <span class="fu">calc_patm</span>(<span class="at">elv =</span> <span class="dv">0</span>))))</span></code></pre></div>
+<pre><code>## [1] &quot;kmm(10)     : 19.6242174524746&quot;</code></pre>
+</div>
+<div id="temperature-dependence-of-quantum-yield-efficiency" class="section level3">
 <h3>Temperature dependence of quantum yield efficiency</h3>
-
-<p>The temperature dependence of quantum yield efficiency is modelled following Bernacchi et al. (2003), if the argument to the <code>rpmodel()</code> call <code>do_ftemp_kphio = TRUE</code>. This affects several quantities returned by the <code>rpmodel()</code> call (GPP, LUE, Vcmax), and can be calculated direction using <code>ftemp_kphio()</code>.</p>
-
-<pre><code class="r">out_pmodel_ftemp_kphio_ON &lt;- rpmodel( 
-  tc             = 20,           # temperature, deg C
-  vpd            = 1000,         # Pa,
-  co2            = 400,          # ppm,
-  fapar          = 1,            # fraction  ,
-  ppfd           = 30,           # mol/m2/d,
-  elv            = 0,            # m.a.s.l.,
-  do_ftemp_kphio = TRUE
-  )
-out_pmodel_ftemp_kphio_OFF &lt;- rpmodel( 
-  tc             = 20,           # temperature, deg C
-  vpd            = 1000,         # Pa,
-  co2            = 400,          # ppm,
-  fapar          = 1,            # fraction  ,
-  ppfd           = 30,           # mol/m2/d,
-  elv            = 0,            # m.a.s.l.,
-  do_ftemp_kphio = FALSE
-  )
-print(paste(&quot;LUE ftemp_ON /LUE ftemp_OFF =&quot;, out_pmodel_ftemp_kphio_ON$lue / out_pmodel_ftemp_kphio_OFF$lue))
-</code></pre>
-
-<pre><code>## [1] &quot;LUE ftemp_ON /LUE ftemp_OFF = &quot;
-</code></pre>
-
-<pre><code class="r">print(paste(&quot;GPP ftemp_ON /GPP ftemp_OFF =&quot;, out_pmodel_ftemp_kphio_ON$gpp / out_pmodel_ftemp_kphio_OFF$gpp))
-</code></pre>
-
-<pre><code>## [1] &quot;GPP ftemp_ON /GPP ftemp_OFF = 1.07351301598735&quot;
-</code></pre>
-
-<pre><code class="r">print(paste(&quot;Vcmax ftemp_ON /Vcmax ftemp_OFF =&quot;, out_pmodel_ftemp_kphio_ON$vcmax / out_pmodel_ftemp_kphio_OFF$vcmax))
-</code></pre>
-
-<pre><code>## [1] &quot;Vcmax ftemp_ON /Vcmax ftemp_OFF = 1.07351301598735&quot;
-</code></pre>
-
-<pre><code class="r">print(paste(&quot;ftemp_kphio(20) =&quot;, ftemp_kphio(20)))
-</code></pre>
-
-<pre><code>## [1] &quot;ftemp_kphio(20) = 0.656&quot;
-</code></pre>
-
+<p>The temperature dependence of quantum yield efficiency is modelled
+following Bernacchi et al. (2003), if the argument to the
+<code>rpmodel()</code> call <code>do_ftemp_kphio = TRUE</code>. This
+affects several quantities returned by the <code>rpmodel()</code> call
+(GPP, LUE, Vcmax), and can be calculated direction using
+<code>ftemp_kphio()</code>.</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" tabindex="-1"></a>out_pmodel_ftemp_kphio_ON <span class="ot">&lt;-</span> <span class="fu">rpmodel</span>( </span>
+<span id="cb49-2"><a href="#cb49-2" tabindex="-1"></a>  <span class="at">tc             =</span> <span class="dv">20</span>,           <span class="co"># temperature, deg C</span></span>
+<span id="cb49-3"><a href="#cb49-3" tabindex="-1"></a>  <span class="at">vpd            =</span> <span class="dv">1000</span>,         <span class="co"># Pa,</span></span>
+<span id="cb49-4"><a href="#cb49-4" tabindex="-1"></a>  <span class="at">co2            =</span> <span class="dv">400</span>,          <span class="co"># ppm,</span></span>
+<span id="cb49-5"><a href="#cb49-5" tabindex="-1"></a>  <span class="at">fapar          =</span> <span class="dv">1</span>,            <span class="co"># fraction  ,</span></span>
+<span id="cb49-6"><a href="#cb49-6" tabindex="-1"></a>  <span class="at">ppfd           =</span> <span class="dv">30</span>,           <span class="co"># mol/m2/d,</span></span>
+<span id="cb49-7"><a href="#cb49-7" tabindex="-1"></a>  <span class="at">elv            =</span> <span class="dv">0</span>,            <span class="co"># m.a.s.l.,</span></span>
+<span id="cb49-8"><a href="#cb49-8" tabindex="-1"></a>  <span class="at">do_ftemp_kphio =</span> <span class="cn">TRUE</span></span>
+<span id="cb49-9"><a href="#cb49-9" tabindex="-1"></a>  )</span>
+<span id="cb49-10"><a href="#cb49-10" tabindex="-1"></a>out_pmodel_ftemp_kphio_OFF <span class="ot">&lt;-</span> <span class="fu">rpmodel</span>( </span>
+<span id="cb49-11"><a href="#cb49-11" tabindex="-1"></a>  <span class="at">tc             =</span> <span class="dv">20</span>,           <span class="co"># temperature, deg C</span></span>
+<span id="cb49-12"><a href="#cb49-12" tabindex="-1"></a>  <span class="at">vpd            =</span> <span class="dv">1000</span>,         <span class="co"># Pa,</span></span>
+<span id="cb49-13"><a href="#cb49-13" tabindex="-1"></a>  <span class="at">co2            =</span> <span class="dv">400</span>,          <span class="co"># ppm,</span></span>
+<span id="cb49-14"><a href="#cb49-14" tabindex="-1"></a>  <span class="at">fapar          =</span> <span class="dv">1</span>,            <span class="co"># fraction  ,</span></span>
+<span id="cb49-15"><a href="#cb49-15" tabindex="-1"></a>  <span class="at">ppfd           =</span> <span class="dv">30</span>,           <span class="co"># mol/m2/d,</span></span>
+<span id="cb49-16"><a href="#cb49-16" tabindex="-1"></a>  <span class="at">elv            =</span> <span class="dv">0</span>,            <span class="co"># m.a.s.l.,</span></span>
+<span id="cb49-17"><a href="#cb49-17" tabindex="-1"></a>  <span class="at">do_ftemp_kphio =</span> <span class="cn">FALSE</span></span>
+<span id="cb49-18"><a href="#cb49-18" tabindex="-1"></a>  )</span>
+<span id="cb49-19"><a href="#cb49-19" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;LUE ftemp_ON /LUE ftemp_OFF =&quot;</span>, out_pmodel_ftemp_kphio_ON<span class="sc">$</span>lue <span class="sc">/</span> out_pmodel_ftemp_kphio_OFF<span class="sc">$</span>lue))</span></code></pre></div>
+<pre><code>## [1] &quot;LUE ftemp_ON /LUE ftemp_OFF = &quot;</code></pre>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;GPP ftemp_ON /GPP ftemp_OFF =&quot;</span>, out_pmodel_ftemp_kphio_ON<span class="sc">$</span>gpp <span class="sc">/</span> out_pmodel_ftemp_kphio_OFF<span class="sc">$</span>gpp))</span></code></pre></div>
+<pre><code>## [1] &quot;GPP ftemp_ON /GPP ftemp_OFF = 1.07351301598735&quot;</code></pre>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Vcmax ftemp_ON /Vcmax ftemp_OFF =&quot;</span>, out_pmodel_ftemp_kphio_ON<span class="sc">$</span>vcmax <span class="sc">/</span> out_pmodel_ftemp_kphio_OFF<span class="sc">$</span>vcmax))</span></code></pre></div>
+<pre><code>## [1] &quot;Vcmax ftemp_ON /Vcmax ftemp_OFF = 1.07351301598735&quot;</code></pre>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;ftemp_kphio(20) =&quot;</span>, <span class="fu">ftemp_kphio</span>(<span class="dv">20</span>)))</span></code></pre></div>
+<pre><code>## [1] &quot;ftemp_kphio(20) = 0.656&quot;</code></pre>
+</div>
+<div id="soil-moisture-stress" class="section level3">
 <h3>Soil moisture stress</h3>
-
-<p>The soil moisture stress function is available as a separate public function.</p>
-
-<pre><code class="r">vec_soilm &lt;- seq(from = 1.0, to = 0.0, by = -0.05)
-vec_soilmstress &lt;- soilmstress( vec_soilm, meanalpha = 1.0, apar_soilm = 0.0, bpar_soilm = 0.7330 )
-plot(vec_soilm, vec_soilmstress)
-</code></pre>
-
-<p><img src="data:image/png;base64,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" alt="plot of chunk unnamed-chunk-13"/></p>
-
-<p>Similar to above, the soil moisture dependence of LUE (and hence GPP, and Vcmax) can be calculated directly using the function <code>soilmstress()</code> and affects several quantities returned by the <code>rpmodel()</code> call (GPP, LUE, Vcmax):</p>
-
-<pre><code class="r">out_pmodel_soilmstress_OFF &lt;- rpmodel( 
-  tc             = 20,           # temperature, deg C
-  vpd            = 1000,         # Pa,
-  co2            = 400,          # ppm,
-  fapar          = 1,            # fraction  ,
-  ppfd           = 30,           # mol/m2/d,
-  elv            = 0,            # m.a.s.l.,
-  do_ftemp_kphio = FALSE,
-  do_soilmstress = FALSE
-  )
-out_pmodel_soilmstress_ON &lt;- rpmodel( 
-  tc             = 20,           # temperature, deg C
-  vpd            = 1000,         # Pa,
-  co2            = 400,          # ppm,
-  fapar          = 1,            # fraction  ,
-  ppfd           = 30,           # mol/m2/d,
-  elv            = 0,            # m.a.s.l.,
-  do_ftemp_kphio = FALSE,
-  do_soilmstress = TRUE,
-  soilm          = 0.2,
-  apar_soilm     = 0.1,
-  bpar_soilm     = 0.7,
-  meanalpha      = 0.2 
-  )
-print(paste(&quot;LUE soilmstress_ON /LUE soilmstress_OFF =&quot;, out_pmodel_soilmstress_ON$lue / out_pmodel_soilmstress_OFF$lue))
-</code></pre>
-
-<pre><code>## [1] &quot;LUE soilmstress_ON /LUE soilmstress_OFF = &quot;
-</code></pre>
-
-<pre><code class="r">print(paste(&quot;GPP soilmstress_ON /GPP soilmstress_OFF =&quot;, out_pmodel_soilmstress_ON$gpp / out_pmodel_soilmstress_OFF$gpp))
-</code></pre>
-
-<pre><code>## [1] &quot;GPP soilmstress_ON /GPP soilmstress_OFF = 0.662222222222222&quot;
-</code></pre>
-
-<pre><code class="r">print(paste(&quot;Vcmax soilmstress_ON /Vcmax soilmstress_OFF =&quot;, out_pmodel_soilmstress_ON$vcmax / out_pmodel_soilmstress_OFF$vcmax))
-</code></pre>
-
-<pre><code>## [1] &quot;Vcmax soilmstress_ON /Vcmax soilmstress_OFF = 0.662222222222222&quot;
-</code></pre>
-
-<pre><code class="r">print(paste(&quot;soilmstress(0.2, apar_soilm = 0.1, bpar_soilm = 0.7, meanalpha = 0.2) =&quot;, soilmstress(0.2, apar_soilm = 0.1, bpar_soilm = 0.7, meanalpha = 0.2)))
-</code></pre>
-
-<pre><code>## [1] &quot;soilmstress(0.2, apar_soilm = 0.1, bpar_soilm = 0.7, meanalpha = 0.2) = 0.662222222222222&quot;
-</code></pre>
-
-<p><code>ftemp_arrh()</code> Calculates the Arrhenius-type temperature response.</p>
-
+<p>The soil moisture stress function is available as a separate public
+function.</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" tabindex="-1"></a>vec_soilm <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="fl">1.0</span>, <span class="at">to =</span> <span class="fl">0.0</span>, <span class="at">by =</span> <span class="sc">-</span><span class="fl">0.05</span>)</span>
+<span id="cb57-2"><a href="#cb57-2" tabindex="-1"></a>vec_soilmstress <span class="ot">&lt;-</span> <span class="fu">calc_soilmstress</span>( vec_soilm, <span class="at">meanalpha =</span> <span class="fl">1.0</span>, <span class="at">apar_soilm =</span> <span class="fl">0.0</span>, <span class="at">bpar_soilm =</span> <span class="fl">0.7330</span> )</span>
+<span id="cb57-3"><a href="#cb57-3" tabindex="-1"></a><span class="fu">plot</span>(vec_soilm, vec_soilmstress)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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BCJDgAQUGfS8MBEgAiQgPgNEgAhEhgAJKDLoeWEiQARIQHwGiAARiAwBElBk0PPCRIAIkID4DBABIhAZAiSgyKDnhYkAESAB8RkgAkQgMgRIQJFBzwsTASJAAuIzQASIQGQIkIAig54XJgJEgATEZ4AIEIHIECABRQY9L0wEiAAJiM8AESACkSFAAooMel6YCBABEhCfASJABCJDgAQUGfS8MBEgAiQgPgNEgAhEhgAJKDLoeWEiQARIQHwGiAARiAwBElBk0PPCRIAIrJErBM45WW211Wz3JUuWyLRp02T33XeXTTfdNNdTlNR+t9xyi9x+++2y3nrrldR9JfFm8Gz+8ccf1vQaNWr4z6l3L3/++afgg+d39dVXz7od2/BJFZwbx+J/tu2VXbu62hbU9rC2rb322jJ27FipU6dO6i3F6vtqehMurEVDhw6VIUOGyLx58+Tjjz+Wli1byvfffy/o7HHjxskhhxwSdoqS277bbrvJlVdeSQIqQs++9dZbgg+IYJdddrEfPu+yd911lzz66KPSqFEjWbFihT2fo0ePlq233tpIacCAAfZjieUvvvhCvv76a3nuuees37B/nz59ZNGiRdKwYUN55513pHbt2vL000/LGmusIV9++aWcc845RjwbbrihzJo1Sw4//HC58MILjcTeeOMNufTSS2WTTTaRtdZaS959913p2bOnnHzyyda8xx57TIYNGyZbbbWV/P777/L+++/LzTff7Lf/pptukmeeeUYaN25s7xPa8fjjj8tmm21m+19yySV2zSZNmsiCBQvk559/tv3Rxh9++EF69+4t33zzjWy++eaGD/4/9NBD9l6iAfvtt59Mnz5ddt55Zw+u+P0HAVUmH3zwgdPOcKeffrrTB8D+b7TRRm7q1KnuP//5j/vnP/9Z2eElu61Vq1aGQcneYExu7JhjjnHbb7+9u/zyy90VV1yBH0vXoUMHp6MOd8cdd9jy0qVL/dY+8sgjtg7P50477eT0R9L9+uuv/vazzjrLtusLbf/btWvnb8MXJSLXrFkzp2Rg26+66ip/+y+//GLrLrjgAqdkZd+ff/55f7sSlq1T0nM68rDv+oPtb1cysHVPPPGE+9e//mXfly9f7m+/7bbbbN3s2bPdBhts4HR24VatWuVv79y5s23/9NNP7f8JJ5zgb8N+uNd99tnHKdnZetz/22+/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/fbb5c8//0zbp7KF5cuXy8knnyz169e36+AcM2bMSDtkypQp0qZNG1lvvfWsHX379pXffvvN3wfHjBo1yl9O/TJgwAC55JJLZOTIkbLTTjvJZpttJr169RLnnNx2223StGlT2WGHHWTw4MGph/F7oRHQDqCUKQI//fSTq127trvuuuvSENh///1d586dbd28efNcrVq1XPPmzd2IESPc0KFDnRKRO/bYY/1jFi5c6DbeeGN36KGHujFjxrhLL73U1axZ091///3+PmFfTjzxRLfFFls4HcU4JUDXtm1bt9Zaa7lvvvnGDn3rrbdcjRo13GGHHeaeeOIJp0Th/vGPf7gOHTr4p65bt6675pprbPnJJ590+u64r776ypZ79OjhlNxckyZN3JAhQ1zPnj1t+wEHHOC23XZbO99pp51m62bNmuWfk18KiwB+AShljMDxxx/vdt99dx8BVdrai/7YY4/Zuq5duxrhrFy50t/n0UcfTXtRQUZ4sf/44w9/n9NPP921bt3aXw77stVWWzkdWfm7ffHFFw6kpKMvW6cjHyNBHVX5+3gk8/LLL9u6MAICIb333nv+8Q0bNrT7+Oijj/x1IEEdLfnL/FJYBKgDKvQQM+bnVwKSQw45RD755BNp0KCBKPHIuuuuKzrSsJZPmjRJ9t13X5k7d65/J5tssomsvvrqMnXqVNlll13k7bffli5dutg6bydMwWCFylVatGghN954o/z888/SqVMn2Xvvvf3plL4CMnPmTME0KvWc2E9HQfLaa6+JjtpCL4V2N2vWzN8PCmsdqUnjxo39dZtvvrnMnz/fX+aXwiJAHVBh8Y392Q888EDT24B4II888ojoqEd0+mNksHTpUtGRhumKoC/CB3oY6HegO8L/Dz/8UDbddNO0e00lirQNWRaGDx8u7du3F50emQ4JuqDLL7/czv/1119bW0AOmYJ1n3/+eebqwOXM43VKZ6SbujPWUYqHAAmoeFjH8kp44bp37y46rZIvv/xSJk+eLDBnQ1T3I2uvvbacd955smLFigqfK6+80kY9GDH98MMPaff3yy+/CBTLuQp8eB5//HFZsmSJjB49Wlq1aiX9+/eXW265RbANhLZs2bIKp/vuu++kUaNGFdYHrSC5BKES7ToSULT4x+LqmIZhinPXXXcJRgkY4UDw0sM6hBHQOuus43/g3AfSUmWt7Yd9pk+fbt+9PzfddJNZqlR35K3K+h9kpXokgfMgLG1oz9ixY41Y0C6MxjBNmjhxYto5VJ8jGB3BqkVJJgIkoGT2W7W2GtMqVSKbF/ExxxyTpsuByV2tXHLWWWfJxx9/LO+//76oRcm+77rrrtaOPn36yPjx4+XCCy+0URTM+zBt9+7d20ZRYY3FKAskc9FFF8m0adNErXNGRtBLQRcEQTswSoNuCXoiTPtgtoceBy4DlIQiUFgdN8+eFARg+dFH2KlCuUKTYXrXaZBth0kepm/1+0nbT6dKrk6dOrYPznPEEUc4mPlzFdUnOVVkO1iycLyOuJwSm29Zg/XrhhtusGvoyMwpaTn1TXKw2nkSZgVTovV2tf9wNcA5UkXJzKxvqev4vXAIrIZTJ5Q72ewiIoDH5LPPPhP198k6qoFCGqMWTKOUDPJqnZry5dNPPxU1y6eNxLyTecpvOBJi1ERJNgIkoGT3H1tPBBKNAP2AEt198W88fIjUm7nShl522WWm1K50J24sSQQ4AirJbo3PTWkoh6xatarSBsHyhmkbpfwQIAGVX5/zjolAbBCgGT42XcGGEIHyQ4AEVH59zjsmArFBgAQUm65gQ4hA+SFAAiq/PucdE4HYIEACik1XsCFEoPwQIAGVX5/zjolAbBAgAcWmK9gQIlB+CJCAyq/PecdEIDYIkIBi0xVsCBEoPwRIQOXX57xjIhAbBEhAsekKNoQIlB8CJKDy63PeMRGIDQIkoNh0BRtCBMoPARJQ+fU575gIxAYBElBsuoINIQLlhwAJqPz6nHdMBGKDAAkoNl3BhhCB8kOABFR+fc47JgKxQYAEFJuuYEOIQPkh8H9Yk9xuDiDWEwAAAABJRU5ErkJggg==" /><!-- --></p>
+<p>Similar to above, the soil moisture dependence of LUE (and hence GPP,
+and Vcmax) can be calculated directly using the function
+<code>calc_soilmstress()</code> and affects several quantities returned
+by the <code>rpmodel()</code> call (GPP, LUE, Vcmax):</p>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" tabindex="-1"></a>out_pmodel_soilmstress_OFF <span class="ot">&lt;-</span> <span class="fu">rpmodel</span>( </span>
+<span id="cb58-2"><a href="#cb58-2" tabindex="-1"></a>  <span class="at">tc             =</span> <span class="dv">20</span>,           <span class="co"># temperature, deg C</span></span>
+<span id="cb58-3"><a href="#cb58-3" tabindex="-1"></a>  <span class="at">vpd            =</span> <span class="dv">1000</span>,         <span class="co"># Pa,</span></span>
+<span id="cb58-4"><a href="#cb58-4" tabindex="-1"></a>  <span class="at">co2            =</span> <span class="dv">400</span>,          <span class="co"># ppm,</span></span>
+<span id="cb58-5"><a href="#cb58-5" tabindex="-1"></a>  <span class="at">fapar          =</span> <span class="dv">1</span>,            <span class="co"># fraction  ,</span></span>
+<span id="cb58-6"><a href="#cb58-6" tabindex="-1"></a>  <span class="at">ppfd           =</span> <span class="dv">30</span>,           <span class="co"># mol/m2/d,</span></span>
+<span id="cb58-7"><a href="#cb58-7" tabindex="-1"></a>  <span class="at">elv            =</span> <span class="dv">0</span>,            <span class="co"># m.a.s.l.,</span></span>
+<span id="cb58-8"><a href="#cb58-8" tabindex="-1"></a>  <span class="at">do_ftemp_kphio =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb58-9"><a href="#cb58-9" tabindex="-1"></a>  <span class="at">do_soilmstress =</span> <span class="cn">FALSE</span></span>
+<span id="cb58-10"><a href="#cb58-10" tabindex="-1"></a>  )</span>
+<span id="cb58-11"><a href="#cb58-11" tabindex="-1"></a>out_pmodel_soilmstress_ON <span class="ot">&lt;-</span> <span class="fu">rpmodel</span>( </span>
+<span id="cb58-12"><a href="#cb58-12" tabindex="-1"></a>  <span class="at">tc             =</span> <span class="dv">20</span>,           <span class="co"># temperature, deg C</span></span>
+<span id="cb58-13"><a href="#cb58-13" tabindex="-1"></a>  <span class="at">vpd            =</span> <span class="dv">1000</span>,         <span class="co"># Pa,</span></span>
+<span id="cb58-14"><a href="#cb58-14" tabindex="-1"></a>  <span class="at">co2            =</span> <span class="dv">400</span>,          <span class="co"># ppm,</span></span>
+<span id="cb58-15"><a href="#cb58-15" tabindex="-1"></a>  <span class="at">fapar          =</span> <span class="dv">1</span>,            <span class="co"># fraction  ,</span></span>
+<span id="cb58-16"><a href="#cb58-16" tabindex="-1"></a>  <span class="at">ppfd           =</span> <span class="dv">30</span>,           <span class="co"># mol/m2/d,</span></span>
+<span id="cb58-17"><a href="#cb58-17" tabindex="-1"></a>  <span class="at">elv            =</span> <span class="dv">0</span>,            <span class="co"># m.a.s.l.,</span></span>
+<span id="cb58-18"><a href="#cb58-18" tabindex="-1"></a>  <span class="at">do_ftemp_kphio =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb58-19"><a href="#cb58-19" tabindex="-1"></a>  <span class="at">do_soilmstress =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb58-20"><a href="#cb58-20" tabindex="-1"></a>  <span class="at">soilm          =</span> <span class="fl">0.2</span>,</span>
+<span id="cb58-21"><a href="#cb58-21" tabindex="-1"></a>  <span class="at">apar_soilm     =</span> <span class="fl">0.1</span>,</span>
+<span id="cb58-22"><a href="#cb58-22" tabindex="-1"></a>  <span class="at">bpar_soilm     =</span> <span class="fl">0.7</span>,</span>
+<span id="cb58-23"><a href="#cb58-23" tabindex="-1"></a>  <span class="at">meanalpha      =</span> <span class="fl">0.2</span> </span>
+<span id="cb58-24"><a href="#cb58-24" tabindex="-1"></a>  )</span>
+<span id="cb58-25"><a href="#cb58-25" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;LUE soilmstress_ON /LUE soilmstress_OFF =&quot;</span>, out_pmodel_soilmstress_ON<span class="sc">$</span>lue <span class="sc">/</span> out_pmodel_soilmstress_OFF<span class="sc">$</span>lue))</span></code></pre></div>
+<pre><code>## [1] &quot;LUE soilmstress_ON /LUE soilmstress_OFF = &quot;</code></pre>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;GPP soilmstress_ON /GPP soilmstress_OFF =&quot;</span>, out_pmodel_soilmstress_ON<span class="sc">$</span>gpp <span class="sc">/</span> out_pmodel_soilmstress_OFF<span class="sc">$</span>gpp))</span></code></pre></div>
+<pre><code>## [1] &quot;GPP soilmstress_ON /GPP soilmstress_OFF = 0.662222222222222&quot;</code></pre>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Vcmax soilmstress_ON /Vcmax soilmstress_OFF =&quot;</span>, out_pmodel_soilmstress_ON<span class="sc">$</span>vcmax <span class="sc">/</span> out_pmodel_soilmstress_OFF<span class="sc">$</span>vcmax))</span></code></pre></div>
+<pre><code>## [1] &quot;Vcmax soilmstress_ON /Vcmax soilmstress_OFF = 0.662222222222222&quot;</code></pre>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;soilmstress(0.2, apar_soilm = 0.1, bpar_soilm = 0.7, meanalpha = 0.2) =&quot;</span>, <span class="fu">calc_soilmstress</span>(<span class="fl">0.2</span>, <span class="at">apar_soilm =</span> <span class="fl">0.1</span>, <span class="at">bpar_soilm =</span> <span class="fl">0.7</span>, <span class="at">meanalpha =</span> <span class="fl">0.2</span>)))</span></code></pre></div>
+<pre><code>## [1] &quot;soilmstress(0.2, apar_soilm = 0.1, bpar_soilm = 0.7, meanalpha = 0.2) = 0.662222222222222&quot;</code></pre>
+<p><code>ftemp_arrh()</code> Calculates the Arrhenius-type temperature
+response.</p>
 <!-- ## Response to CO2 -->
-
 <!-- ```{r} -->
-
 <!-- library(ggplot) -->
-
 <!-- df <- tibble( -->
-
 <!--   tc             = rep(20, 100), -->
-
 <!--   vpd            = rep(1000, 100), -->
-
 <!--   co2            = seq(360, 1000, length.out = 100), -->
-
 <!--   fapar          = rep(1, 100), -->
-
 <!--   ppfd           = rep(100, 100) -->
-
-<!--   ) %>% &ndash;>
-
+<!--   ) %>% -->
 <!--   dplyr::mutate( out_pmodel_simpl = purrr::pmap(., rpmodel, -->
-
 <!--     elv            = 0, -->
-
 <!--     kphio          = 0.05, -->
-
 <!--     beta           = 146, -->
-
 <!--     method_optci   = "prentice14", -->
-
 <!--     method_jmaxlim = "none", -->
-
 <!--     do_ftemp_kphio = FALSE -->
-
-<!--     ) ) %>% &ndash;>
-
+<!--     ) ) %>% -->
 <!--   dplyr::mutate( out_pmodel_full = purrr::pmap(dplyr::select(., 1:5), rpmodel,  -->
-
 <!--     elv            = 0,          -->
-
 <!--     kphio          = 0.05,          -->
-
 <!--     beta           = 146, -->
-
 <!--     method_optci   = "prentice14", -->
-
 <!--     method_jmaxlim = "wang17", -->
-
 <!--     do_ftemp_kphio = FALSE -->
-
-<!--     ) ) %>%  &ndash;>
-
-<!--   dplyr::mutate( out_pmodel_simpl = purrr::map(out_pmodel_simpl, ~as_tibble(.))) %>% &ndash;>
-
+<!--     ) ) %>%  -->
+<!--   dplyr::mutate( out_pmodel_simpl = purrr::map(out_pmodel_simpl, ~as_tibble(.))) %>% -->
 <!--   dplyr::mutate( out_pmodel_full  = purrr::map(out_pmodel_full,  ~as_tibble(.))) -->
-
-<!-- df %>%  &ndash;>
-
-<!--   tidyr::unnest(out_pmodel_full) %>%  &ndash;>
-
-<!--   dplyr::select(co2, out_pmodel_simpl, gpp_full = gpp) %>%  &ndash;>
-
-<!--   tidyr::unnest(out_pmodel_simpl) %>%  &ndash;>
-
-<!--   dplyr::select(co2, gpp_full, gpp_simpl = gpp) %>%  &ndash;>
-
-<!--   tidyr::gather(method, gpp, c(gpp_full, gpp_simpl)) %>%  &ndash;>
-
+<!-- df %>%  -->
+<!--   tidyr::unnest(out_pmodel_full) %>%  -->
+<!--   dplyr::select(co2, out_pmodel_simpl, gpp_full = gpp) %>%  -->
+<!--   tidyr::unnest(out_pmodel_simpl) %>%  -->
+<!--   dplyr::select(co2, gpp_full, gpp_simpl = gpp) %>%  -->
+<!--   tidyr::gather(method, gpp, c(gpp_full, gpp_simpl)) %>%  -->
 <!--   ggplot(aes(x = co2, y = gpp, color = method)) + -->
-
 <!--   geom_line() -->
-
 <!-- ``` -->
-
+</div>
+</div>
+<div id="references" class="section level2">
 <h2>References</h2>
+<p>Bernacchi, C. J., Pimentel, C., and Long, S. P.: In vivo temperature
+response func-tions of parameters required to model RuBP-limited
+photosynthesis, Plant Cell Environ., 26, 1419–1430, 2003</p>
+<p>Cai, W., and Prentice, I. C.: Recent trends in gross primary
+production and their drivers: analysis and modelling at flux-site and
+global scales, Environ. Res. Lett. 15 124050
+https://doi.org/10.1088/1748-9326/abc64e, 2020</p>
+<p>Stocker, B. D., Wang, H., Smith, N. G., Harrison, S. P., Keenan, T.
+F., Sandoval, D., Davis, T., and Prentice, I. C.: P-model v1.0: An
+optimality-based light use efficiency model for simulating ecosystem
+gross primary production, Geosci. Model Dev. Discuss., <a href="https://doi.org/10.5194/gmd-2019-200" class="uri">https://doi.org/10.5194/gmd-2019-200</a>, in review,
+2019.</p>
+</div>
 
-<p>Stocker, B. D., Wang, H., Smith, N. G., Harrison, S. P., Keenan, T. F., Sandoval, D., Davis, T., and Prentice, I. C.: P-model v1.0: An optimality-based light use efficiency model for simulating ecosystem gross primary production, Geosci. Model Dev. Discuss., <a href="https://doi.org/10.5194/gmd-2019-200">https://doi.org/10.5194/gmd-2019-200</a>, in review, 2019.</p>
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
 
 </body>
-
 </html>

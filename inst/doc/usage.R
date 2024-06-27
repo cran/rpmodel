@@ -10,7 +10,6 @@ out_pmodel <- rpmodel(
   kphio          = 0.049977,     # quantum yield efficiency as calibrated for setup ORG by Stocker et al. 2020 GMD,
   beta           = 146,          # unit cost ratio a/b,
   c4             = FALSE,
-  method_optci   = "prentice14",
   method_jmaxlim = "wang17",
   do_ftemp_kphio = FALSE,        # corresponding to setup ORG
   do_soilmstress = FALSE,        # corresponding to setup ORG
@@ -52,7 +51,6 @@ out_ts_pmodel <- rpmodel(
   kphio          = 0.049977,
   beta           = 146,
   c4             = FALSE,
-  method_optci   = "prentice14",
   method_jmaxlim = "none",
   do_ftemp_kphio = TRUE,
   do_soilmstress = FALSE,
@@ -78,7 +76,6 @@ print(out_ts_pmodel$gpp)
 #      kphio          = 0.049977,
 #      beta           = 146,
 #      c4             = FALSE,
-#      method_optci   = "prentice14",
 #      method_jmaxlim = "none",
 #      do_ftemp_kphio = FALSE
 #      ) )
@@ -93,6 +90,28 @@ print(out_ts_pmodel$gpp)
 #  print(df)
 
 ## -----------------------------------------------------------------------------
+out_c3 <- rpmodel( 
+  tc             = 20,           # temperature, deg C
+  vpd            = 1000,         # Pa,
+  co2            = 400,          # ppm,
+  fapar          = 1,            # fraction  ,
+  ppfd           = 30,           # mol/m2/d,
+  elv            = 0,            # m.a.s.l.,
+  c4             = FALSE
+  )
+out_c4 <- rpmodel( 
+  tc             = 20,           # temperature, deg C
+  vpd            = 1000,         # Pa,
+  co2            = 400,          # ppm,
+  fapar          = 1,            # fraction  ,
+  ppfd           = 30,           # mol/m2/d,
+  elv            = 0,            # m.a.s.l.,
+  c4             = TRUE
+  )
+print(out_c3$gpp)
+print(out_c4$gpp)
+
+## -----------------------------------------------------------------------------
 out_pmodel <- rpmodel( 
   tc             = 10,           # temperature, deg C
   vpd            = 1000,         # Pa,
@@ -102,7 +121,6 @@ out_pmodel <- rpmodel(
   elv            = 0,            # m.a.s.l.,
   kphio          = 0.049977,     # quantum yield efficiency as calibrated for setup ORG by Stocker et al. 2020 GMD,
   beta           = 146,          # unit cost ratio a/b,
-  method_optci   = "prentice14",
   method_jmaxlim = "none",
   do_ftemp_kphio = FALSE,
   verbose        = TRUE
@@ -115,11 +133,11 @@ print(paste("ftemp_inst_rd(10):", ftemp_inst_rd(10)))
 
 ## -----------------------------------------------------------------------------
 print(paste("From rpmodel call :", out_pmodel$gammastar))
-print(paste("gammastar(10):", gammastar(10, patm = patm(elv = 0))))
+print(paste("gammastar(10):", calc_gammastar(10, patm = calc_patm(elv = 0))))
 
 ## -----------------------------------------------------------------------------
 print(paste("From rpmodel call:", out_pmodel$kmm))
-print(paste("kmm(10)     :", kmm(10, patm = patm(elv = 0))))
+print(paste("kmm(10)     :", calc_kmm(10, patm = calc_patm(elv = 0))))
 
 ## -----------------------------------------------------------------------------
 out_pmodel_ftemp_kphio_ON <- rpmodel( 
@@ -147,7 +165,7 @@ print(paste("ftemp_kphio(20) =", ftemp_kphio(20)))
 
 ## -----------------------------------------------------------------------------
 vec_soilm <- seq(from = 1.0, to = 0.0, by = -0.05)
-vec_soilmstress <- soilmstress( vec_soilm, meanalpha = 1.0, apar_soilm = 0.0, bpar_soilm = 0.7330 )
+vec_soilmstress <- calc_soilmstress( vec_soilm, meanalpha = 1.0, apar_soilm = 0.0, bpar_soilm = 0.7330 )
 plot(vec_soilm, vec_soilmstress)
 
 ## -----------------------------------------------------------------------------
@@ -178,5 +196,5 @@ out_pmodel_soilmstress_ON <- rpmodel(
 print(paste("LUE soilmstress_ON /LUE soilmstress_OFF =", out_pmodel_soilmstress_ON$lue / out_pmodel_soilmstress_OFF$lue))
 print(paste("GPP soilmstress_ON /GPP soilmstress_OFF =", out_pmodel_soilmstress_ON$gpp / out_pmodel_soilmstress_OFF$gpp))
 print(paste("Vcmax soilmstress_ON /Vcmax soilmstress_OFF =", out_pmodel_soilmstress_ON$vcmax / out_pmodel_soilmstress_OFF$vcmax))
-print(paste("soilmstress(0.2, apar_soilm = 0.1, bpar_soilm = 0.7, meanalpha = 0.2) =", soilmstress(0.2, apar_soilm = 0.1, bpar_soilm = 0.7, meanalpha = 0.2)))
+print(paste("soilmstress(0.2, apar_soilm = 0.1, bpar_soilm = 0.7, meanalpha = 0.2) =", calc_soilmstress(0.2, apar_soilm = 0.1, bpar_soilm = 0.7, meanalpha = 0.2)))
 

@@ -12,14 +12,14 @@ rpmodel(
   ppfd,
   patm = NA,
   elv = NA,
-  kphio = ifelse(do_ftemp_kphio, ifelse(do_soilmstress, 0.087182, 0.081785), 0.049977),
-  beta = 146,
+  kphio = ifelse(c4, 1, ifelse(do_ftemp_kphio, ifelse(do_soilmstress, 0.087182,
+    0.081785), 0.049977)),
+  beta = ifelse(c4, 146/9, 146),
   soilm = stopifnot(!do_soilmstress),
   meanalpha = 1,
   apar_soilm = 0,
   bpar_soilm = 0.733,
   c4 = FALSE,
-  method_optci = "prentice14",
   method_jmaxlim = "wang17",
   do_ftemp_kphio = TRUE,
   do_soilmstress = FALSE,
@@ -47,12 +47,12 @@ respective output variables are returned as per unit months.}
 \item{patm}{Atmospheric pressure (Pa). When provided, overrides
 \code{elv}, otherwise \code{patm} is calculated using standard
 atmosphere (101325 Pa), corrected for elevation (argument \code{elv}),
-using the function \link{patm}.}
+using the function \link{calc_patm}.}
 
 \item{elv}{Elevation above sea-level (m.a.s.l.). Is used only for 
  calculating atmospheric pressure (using standard atmosphere (101325 Pa),
  corrected for elevation (argument \code{elv}), using the function
-\link{patm}), if argument \code{patm} is not provided. If argument
+\link{calc_patm}), if argument \code{patm} is not provided. If argument
 \code{patm} is provided, \code{elv} is overridden.}
 
 \item{kphio}{Apparent quantum yield efficiency (unitless). Defaults to
@@ -62,21 +62,26 @@ do_ftemp_kphio=TRUE, do_soilmstress=TRUE}, and 0.049977 for
 \code{method_jmaxlim="wang17", do_ftemp_kphio=FALSE, do_soilmstress=FALSE},
 corresponding to the empirically fitted value as presented in Stocker et al.
 (2019) Geosci. Model Dev. for model setup 'BRC', 'FULL', and 'ORG' 
-respectively.}
+respectively, corresponding to \eqn{(a_L b_L)/4} in 
+Eq.20 in Stocker et al. (2020) for C3 photosynthesis. For C4 photosynthesis
+(\code{c4 = TRUE}), \code{kphio} defaults to 1.0, corresponding to the 
+ parametrisation by  Cai & Prentice (2020).}
 
-\item{beta}{Unit cost ratio. Defaults to 146.0 (see Stocker et al., 2019).}
+\item{beta}{Unit cost ratio. Defaults to 146.0 (see Stocker et al., 2019) for
+C3 plants and 146/9 for C4 plants.}
 
 \item{soilm}{(Optional, used only if \code{do_soilmstress==TRUE}) Relative 
 soil moisture as a fraction of field capacity (unitless). Defaults to 1.0 
 (no soil moisture stress). This information is used to calculate
-an empirical soil moisture stress factor (\link{soilmstress}) whereby
+an empirical soil moisture stress factor (\link{calc_soilmstress}) whereby
 the sensitivity is determined by average aridity, defined by the local 
 annual mean ratio of actual over potential evapotranspiration, supplied by
 argument \code{meanalpha}.}
 
 \item{meanalpha}{(Optional, used only if \code{do_soilmstress==TRUE}) Local 
 annual mean ratio of actual over potential evapotranspiration, measure for 
-average aridity. Defaults to 1.0.}
+average aridity. Defaults to 1.0. Only scalar numbers are accepted. If 
+a vector is provided, only the first element will be used.}
 
 \item{apar_soilm}{(Optional, used only if \code{do_soilmstress==TRUE}) 
 Parameter determining the sensitivity of the empirical soil moisture stress 
@@ -92,16 +97,13 @@ Stocker et al. (2019) Geosci. Model Dev. for model setup 'FULL'
 (corresponding to a setup with \code{method_jmaxlim="wang17", 
 do_ftemp_kphio=TRUE, do_soilmstress=TRUE}).}
 
-\item{c4}{(Optional) A logical value specifying whether the C3 or C4 
+\item{c4}{(Optional) A logical value specifying whether the C3 or C4
 photosynthetic pathway is followed.Defaults to \code{FALSE}. If \code{TRUE},
-the leaf-internal CO2 concentration is assumed to be very large and 
-\eqn{m} (returned variable \code{mj}) tends to 1, and \eqn{m'} tends to 
-0.669 (with \code{c = 0.41}).}
-
-\item{method_optci}{(Optional) A character string specifying which method is
-to be used for calculating optimal ci:ca. Defaults to \code{"prentice14"}.
-Available also \code{"prentice14_num"} for a numerical solution to the same
-optimization criterium as used for \code{"prentice14"}.}
+the leaf-internal CO2 concentration is still estimated using beta but
+\eqn{m} (returned variable \code{mj}) tends to 1, and \eqn{m'} tends to
+0.669 (with \code{c = 0.41}) to represent CO2 concentrations within the leaf.
+With \code{do_ftemp_kphio = TRUE}, a C4-specific temperature dependence of
+the quantum yield efficiency is used (see \link{ftemp_kphio}).}
 
 \item{method_jmaxlim}{(Optional) A character string specifying which method 
 is to be used for factoring in Jmax limitation. Defaults to \code{"wang17"},
@@ -110,8 +112,9 @@ also \code{"smith19"}, following the method by Smith et al., 2019 Ecology
 Letters, and \code{"none"} for ignoring effects of Jmax limitation.}
 
 \item{do_ftemp_kphio}{(Optional) A logical specifying whether 
-temperature-dependence of quantum yield efficiency after Bernacchi et al., 
-2003 is to be accounted for. Defaults to \code{TRUE}.}
+temperature-dependence of quantum yield efficiency is used. See \link{ftemp_kphio}
+for details. Defaults to \code{TRUE}. Only scalar numbers are accepted. If 
+a vector is provided, only the first element will be used.}
 
 \item{do_soilmstress}{(Optional) A logical specifying whether an empirical 
 soil moisture stress factor is to be applied to down-scale light use 
@@ -132,10 +135,10 @@ including all its corollary). This includes :
  \item \code{ca}: Ambient CO2 expressed as partial pressure (Pa)
  
  \item \code{gammastar}: Photorespiratory compensation point \eqn{\Gamma*}, 
-  (Pa), see \link{gammastar}.
+  (Pa), see \link{calc_gammastar}.
  
  \item \code{kmm}: Michaelis-Menten coefficient \eqn{K} for photosynthesis 
- (Pa), see \link{kmm}.
+ (Pa), see \link{calc_kmm}.
  
  \item \code{ns_star}: Change in the viscosity of water, relative to its 
   value at 25 deg C (unitless).
@@ -153,8 +156,8 @@ including all its corollary). This includes :
    \xi = \sqrt (\beta (K+ \Gamma*) / (1.6 \eta*))
   }
   \eqn{\beta} is given by argument \code{beta}, \eqn{K} is 
-  \code{kmm} (see \link{kmm}), \eqn{\Gamma*} is 
-  \code{gammastar} (see \link{gammastar}). \eqn{\eta*} is \code{ns_star}.
+  \code{kmm} (see \link{calc_kmm}), \eqn{\Gamma*} is 
+  \code{gammastar} (see \link{calc_gammastar}). \eqn{\eta*} is \code{ns_star}.
   \eqn{D} is the vapour pressure deficit (argument \code{vpd}), \eqn{ca} is 
   the ambient CO2 partial pressure in Pa (\code{ca}).
   
@@ -174,17 +177,17 @@ including all its corollary). This includes :
                         with \eqn{c=0.41} (Wang et al., 2017) if \code{method_jmaxlim=="wang17"}. \eqn{Mc} is
                         the molecular mass of C (12.0107 g mol-1). \eqn{m} is given returned variable \code{mj}.
                         If \code{do_soilmstress==TRUE}, \eqn{LUE} is multiplied with a soil moisture stress factor,
-                        calculated with \link{soilmstress}.
+                        calculated with \link{calc_soilmstress}.
         \item \code{mj}: Factor in the light-limited assimilation rate function, given by
                         \deqn{
                             m = (ci - \Gamma*) / (ci + 2 \Gamma*)
                        }
-                       where \eqn{\Gamma*} is given by \code{gammastar}.
+                       where \eqn{\Gamma*} is given by \code{calc_gammastar}.
         \item \code{mc}: Factor in the Rubisco-limited assimilation rate function, given by
                         \deqn{
                             mc = (ci - \Gamma*) / (ci + K)
                        }
-                       where \eqn{K} is given by \code{kmm}.
+                       where \eqn{K} is given by \code{calc_kmm}.
         \item \code{gpp}: Gross primary production (g C m-2), calculated as
                        \deqn{
                            GPP = Iabs LUE
@@ -234,7 +237,7 @@ Additional variables are contained in the returned list if argument \code{method
   
  \item \code{omega_star}: Term corresponding to \eqn{\omega^\ast}, defined by
   Eq. 18 in Smith et al. (2019), and Eq. E21 in Stocker et al. (2019).
- }
+ }patm
 }
 \description{
 R implementation of the P-model and its 
@@ -255,6 +258,8 @@ corollary predictions (Prentice et al., 2014; Han et al., 2017).
 Bernacchi, C. J., Pimentel, C., and Long, S. P.:  In vivo temperature response func-tions  of  parameters
  required  to  model  RuBP-limited  photosynthesis,  Plant  Cell Environ., 26, 1419–1430, 2003
 
+ and their drivers: analysis and modelling at flux-site and global scales,
+ Environ. Res. Lett. 15 124050 https://doi.org/10.1088/1748-9326/abc64e, 2020
  Heskel,  M.,  O’Sullivan,  O.,  Reich,  P.,  Tjoelker,  M.,  Weerasinghe,  L.,  Penillard,  A.,Egerton, J.,
  Creek, D., Bloomfield, K., Xiang, J., Sinca, F., Stangl, Z., Martinez-De La Torre, A., Griffin, K.,
  Huntingford, C., Hurry, V., Meir, P., Turnbull, M.,and Atkin, O.:  Convergence in the temperature response
